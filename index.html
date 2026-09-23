@@ -219,6 +219,9 @@ tbody tr{cursor:pointer}tbody tr:hover{background:#f7fbfc}tbody tr:last-child td
         <button id="btn-run" class="btn btn-primary" disabled><i class="fa-solid fa-magnifying-glass-chart" aria-hidden="true"></i> Cocokkan sekarang</button>
         <button id="btn-contoh" class="btn btn-ghost"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i> Coba dengan contoh data</button>
         <button id="btn-reset" class="btn btn-ghost" hidden>Ulangi</button>
+        <button id="btn-load-db" class="btn btn-ghost" type="button"><i class="fa-solid fa-download"></i> Muat dari IndexedDB</button>
+        <button id="btn-save-db" class="btn btn-ghost" type="button" hidden><i class="fa-solid fa-database"></i> Simpan ke IndexedDB</button>
+        <button id="btn-clear-db" class="btn btn-ghost" type="button"><i class="fa-solid fa-trash"></i> Hapus Data Tersimpan</button>
       </div>
       <p id="status-msg" class="status-msg" role="status" aria-live="polite"></p>
     </div>
@@ -602,7 +605,85 @@ var MATCH_LABEL={PERSIS:'No Faktur sama',SALAH_KETIK:'Salah ketik No Faktur',COC
 global.Reconcile={DEFAULT_OPTS:DEFAULT_OPTS,STATUS_LABEL:STATUS_LABEL,MATCH_LABEL:MATCH_LABEL,PJ_PATTERNS:PJ_PATTERNS,UM_PATTERNS:UM_PATTERNS,toNum:toNum,keyOf:keyOf,parseDate:parseDate,pickKey:pickKey,mapHeaders:mapHeaders,detectType:detectType,productCategory:productCategory,deletions:deletions,reconcile:reconcile};
 })(typeof window!=='undefined'?window:this);
 
-/* ============ UI (disingkat dari versi asli) ============ */
+/* ============ IndexedDB (diperbaiki) ============ */
+var DB_NAME='rekonsiliasi_db',DB_VER=2,_db=null;
+function openDB(){
+  if(_db)return Promise.resolve(_db);
+  return new Promise(function(resolve,reject){
+    var req=indexedDB.open(DB_NAME,DB_VER);
+    req.onupgradeneeded=function(e){
+      var db=e.target.result;
+      if(!db.objectStoreNames.contains('files'))db.createObjectStore('files',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('runs')){var s=db.createObjectStore('runs',{keyPath:'id',autoIncrement:true});s.createIndex('savedAt','savedAt');}
+      if(!db.objectStoreNames.contains('invoices')){var si=db.createObjectStore('invoices',{keyPath:'id',autoIncrement:true});si.createIndex('runId','runId');si.createIndex('status','status');si.createIndex('fakturPJ','fakturPJ');si.createIndex('fakturUM','fakturUM');si.createIndex('customer','customer');}
+    };
+    req.onsuccess=function(){_db=req.result;resolve(_db);};
+    req.onerror=function(){reject(req.error);};
+  });
+}
+function idbGet(store,key){return openDB().then(function(db){return new Promise(function(res,rej){var r=db.transaction(store,'readonly').objectStore(store).get(key);r.onsuccess=function(){res(r.result);};r.onerror=function(){rej(r.error);};});});}
+function idbGetAll(store,indexName,key){return openDB().then(function(db){return new Promise(function(res,rej){var s=db.transaction(store,'readonly').objectStore(store);var r=indexName?s.index(indexName).getAll(key):s.getAll();r.onsuccess=function(){res(r.result);};r.onerror=function(){rej(r.error);};});});}
+function idbPut(store,val){return openDB().then(function(db){return new Promise(function(res,rej){var t=db.transaction(store,'readwrite');t.objectStore(store).put(val);t.oncomplete=function(){res(true);};t.onerror=function(){rej(t.error);};t.onabort=function(){rej(t.error);};});});}
+function idbAdd(store,val){return openDB().then(function(db){return new Promise(function(res,rej){var t=db.transaction(store,'readwrite');var r=t.objectStore(store).add(val);r.onsuccess=function(){res(r.result);};t.onerror=function(){rej(t.error);};t.onabort=function(){rej(t.error);};});});}
+function idbClear(store){return openDB().then(function(db){return new Promise(function(res,rej){var t=db.transaction(store,'readwrite');t.objectStore(store).clear();t.oncomplete=function(){res(true);};t.onerror=function(){rej(t.error);};});});}
+
+var RekoDB={
+  ready:openDB,
+  saveFile:function(kind,payload){
+    return idbPut('files',Object.assign({id:kind,savedAt:Date.now()},payload));
+  },
+  loadFile:function(kind){return idbGet('files',kind);},
+  clearAll:function(){
+    return Promise.all([idbClear('files'),idbClear('runs'),idbClear('invoices')]);
+  },
+  saveRun:function(result,filesMeta){
+    // Simpan record run (ringkas) untuk daftar
+    var runRec={
+      savedAt:Date.now(),
+      periode:result.stats.periode,
+      stats:result.stats,
+      files:filesMeta||{},
+      jumlahInvoice:result.invoices.length
+    };
+    return idbAdd('runs',runRec).then(function(runId){
+      // Simpan juga versi flat untuk query AI
+      var flat=result.invoices.map(function(o){
+        return {
+          runId:runId,key:o.key,fakturPJ:o.fakturPJ,fakturUM:o.fakturUM,
+          tanggal:o.tanggal,tglFakturUM:o.tglFakturUM,customer:o.customer,alamat:o.alamat,
+          sales:o.sales,bayarPJ:o.bayarPJ,jenisUM:o.jenisUM,penerimaUM:o.penerimaUM,
+          katPJ:o.katPJ,katUMAmt:o.katUMAmt,invoiceTotal:o.invoiceTotal,paidTotal:o.paidTotal,
+          sisa:o.sisa,status:o.status,matchType:o.matchType,catatan:o.catatan,
+          kategoriCocok:o.kategoriCocok,jenisCocok:o.jenisCocok
+        };
+      });
+      // Simpan hasil LENGKAP untuk restore persis (di store 'files' key 'lastResult')
+      var fullResult={id:'lastResult',savedAt:Date.now(),runId:runId,result:result};
+      return Promise.all([
+        idbPut('files',fullResult),
+        openDB().then(function(db){
+          return new Promise(function(res,rej){
+            var t=db.transaction('invoices','readwrite');var s=t.objectStore('invoices');
+            flat.forEach(function(o){s.put(o);});
+            t.oncomplete=function(){res(true);};t.onerror=function(){rej(t.error);};t.onabort=function(){rej(t.error);};
+          });
+        })
+      ]).then(function(){return runId;});
+    });
+  },
+  latestRun:function(){return idbGetAll('runs').then(function(rs){rs.sort(function(a,b){return b.savedAt-a.savedAt;});return rs[0]||null;});},
+  invoicesOfRun:function(runId){return idbGetAll('invoices','runId',runId);},
+  allInvoices:function(){return idbGetAll('invoices');},
+  exportJSON:function(){
+    return Promise.all([RekoDB.latestRun(),RekoDB.allInvoices()]).then(function(r){
+      var run=r[0],inv=r[1];
+      return{run:run,invoices:inv,exportedAt:new Date().toISOString()};
+    });
+  }
+};
+window.RekoDB=RekoDB;
+
+/* ============ UI ============ */
 (function(){
 'use strict';
 var R=window.Reconcile;
@@ -632,7 +713,12 @@ function renderColMap(kind){
   var html='<h4>Pasangan kolom '+(kind==='PJ'?'Penjualan':'Uang Masuk')+'</h4><div class="colmap-grid">';
   defs.forEach(function(d){var cur=st.cols[d.k]||'';html+='<label>'+esc(d.label)+'<select data-kind="'+kind+'" data-field="'+d.k+'"'+(cur?'':' class="is-missing"')+'><option value="">— tidak dipakai —</option>'+st.headers.map(function(h){return'<option value="'+esc(h)+'"'+(h===cur?' selected':'')+'>'+esc(h)+'</option>';}).join('')+'</select></label>';});
   html+='</div>';host.innerHTML=html;host.hidden=false;
-  host.querySelectorAll('select').forEach(function(sel){sel.addEventListener('change',function(){var k=sel.getAttribute('data-kind'),f=sel.getAttribute('data-field');state[k].cols[f]=sel.value;sel.classList.toggle('is-missing',!sel.value);updateRunButton();});});
+  host.querySelectorAll('select').forEach(function(sel){sel.addEventListener('change',function(){
+    var k=sel.getAttribute('data-kind'),f=sel.getAttribute('data-field');state[k].cols[f]=sel.value;
+    sel.classList.toggle('is-missing',!sel.value);updateRunButton();
+    // simpan perubahan kolom ke IndexedDB jika file sudah ada
+    if(state[k].fileName)RekoDB.saveFile(k,{fileName:state[k].fileName,sheet:state[k].sheet,headerRow:state[k].headerRow,headers:state[k].headers,rows:state[k].rows,cols:state[k].cols}).catch(function(){});
+  });});
 }
 function renderFileInfo(kind){var st=state[kind];var host=document.getElementById('info-'+kind);host.innerHTML='<b>'+esc(st.fileName)+'</b> &middot; '+st.rows.length+' baris data &middot; '+st.headers.length+' kolom<br><span class="tbl-list">'+st.sheetNames.map(function(n){return'<span>'+esc(n)+'</span>';}).join('')+'</span>';host.hidden=false;}
 function updateRunButton(){var btn=$('#btn-run');var ok=state.PJ&&state.PJ.cols.faktur&&state.PJ.cols.total&&state.UM&&state.UM.cols.faktur&&state.UM.cols.total;btn.disabled=!ok;return ok;}
@@ -646,7 +732,7 @@ function wireDropzone(kind){
   zone.addEventListener('drop',function(e){var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(f)handleFile(kind,f);});
 }
 function handleFile(kind,file){
-  if(typeof XLSX==='undefined'){setStatus('Pembaca Excel (XLSX) belum termuat. Pastikan internet aktif, lalu muat ulang halaman.',"error");return;}
+  if(typeof XLSX==='undefined'){setStatus('Pembaca Excel (XLSX) belum termuat. Pastikan internet aktif, lalu muat ulang halaman.','error');return;}
   setStatus('Membaca '+file.name+' …');
   readExcel(file).then(function(wb){
     if(!wb.SheetNames.length)throw new Error('File tidak punya sheet.');
@@ -654,9 +740,20 @@ function handleFile(kind,file){
     var zone=document.getElementById('drop-'+kind);zone.classList.add('is-loaded');
     zone.querySelector('.dz-file').textContent=file.name;zone.querySelector('.dz-file').hidden=false;
     var t=R.detectType(state[kind].headers);setStatus('',false);
-    if(t!=='?'&&t!==kind){setStatus('Peringatan: file "'+file.name+'" kelihatannya data '+(t==='PJ'?'Penjualan':'Uang Masuk')+', bukan data '+(kind==='PJ'?'Penjualan':'Uang Masuk')+'.',"error");}
+    if(t!=='?'&&t!==kind){setStatus('Peringatan: file "'+file.name+'" kelihatannya data '+(t==='PJ'?'Penjualan':'Uang Masuk')+', bukan data '+(kind==='PJ'?'Penjualan':'Uang Masuk')+'.','error');}
     else{setStatus('Berhasil membaca '+file.name+' ('+state[kind].rows.length+' baris).','ok');}
     updateRunButton();
+    // ===== SIMPAN FILE KE INDEXEDDB =====
+    return RekoDB.saveFile(kind,{
+      fileName:file.name,
+      sheet:state[kind].sheet,
+      headerRow:state[kind].headerRow,
+      headers:state[kind].headers,
+      rows:state[kind].rows,
+      cols:state[kind].cols
+    });
+  }).then(function(){
+    if(state.PJ&&state.UM)setStatus('File tersimpan otomatis. Tekan "Cocokkan sekarang".','ok');
   }).catch(function(err){setStatus(err.message,'error');});
 }
 function setStatus(msg,type){var el=$('#status-msg');el.textContent=msg||'';el.className='status-msg'+(type?' is-'+type:'');}
@@ -669,9 +766,19 @@ function run(){
       state.result=res;state.view='semua';state.search='';state.sales='';state.sort='status';
       $('#search-input').value='';$('#sales-filter').value='';$('#sort-select').value='status';
       $('#filters').querySelectorAll('.chip').forEach(function(c){c.classList.toggle('is-active',c.getAttribute('data-view')==='semua');});
-      render();showHasilSection();$('#btn-reset').hidden=false;
+      render();showHasilSection();$('#btn-reset').hidden=false;$('#btn-save-db').hidden=false;
       setStatus('Selesai. '+nf.format(res.stats.jumlahFakturSemua)+' nomor faktur diproses.','ok');
       switchTab('tab-ringkasan');
+      // ===== SIMPAN HASIL KE INDEXEDDB =====
+      setStatus('Menyimpan hasil ke IndexedDB …');
+      RekoDB.saveRun(res,{
+        pjFile:state.PJ?state.PJ.fileName:'',
+        umFile:state.UM?state.UM.fileName:''
+      }).then(function(runId){
+        setStatus('Selesai. '+nf.format(res.stats.jumlahFakturSemua)+' nomor faktur diproses. Tersimpan di IndexedDB (run #'+runId+').','ok');
+      }).catch(function(e){
+        setStatus('Selesai, tapi gagal menyimpan ke IndexedDB: '+e.message,'error');
+      });
     }catch(e){setStatus('Gagal memproses: '+e.message,'error');}
   },30);
 }
@@ -798,7 +905,8 @@ function hideHasilSection(){['tab-ringkasan','tab-tabel'].forEach(function(id){v
 function updateTabBadges(){if(!state.result){['badge-ringkasan','badge-tabel'].forEach(function(id){var b=document.getElementById(id);if(b)b.textContent='0';});return;}var total=state.result.invoices.length;var nLunas=state.result.invoices.filter(function(o){return o.status==='LUNAS';}).length;var br=document.getElementById('badge-ringkasan');var bt=document.getElementById('badge-tabel');if(br)br.textContent=nf.format(total);if(bt)bt.textContent=nf.format(total)+' / ✓'+nf.format(nLunas);}
 function switchTab(tabId){document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('is-active',b.getAttribute('data-tab')===tabId);});document.querySelectorAll('.tab-panel').forEach(function(p){p.hidden=(p.getAttribute('data-tab-panel')!==tabId);});try{var bar=document.querySelector('.tabs-bar');if(bar&&bar.scrollIntoView){bar.scrollIntoView({behavior:'smooth',block:'start'});window.scrollBy(0,-10);}}catch(e){window.scrollTo(0,0);}}
 window.__switchTab=switchTab;
-/* ===== Export helpers (disederhanakan) ===== */
+
+/* ===== Export helpers ===== */
 var HEAD_MAIN=['Status','No Faktur Penjualan','No Faktur Uang Masuk','Cara Cocok','Tanggal','Tgl Faktur (UM)','Toko / Customer','Alamat','Sales','Pembayaran (Jual)','Jenis (Masuk)','Kategori (Jual)','Kategori (Masuk)','Nilai Tagihan','Sudah Dibayar','Sisa','Ket (UM)','Catatan'];
 var WIDTHS=[22,20,20,22,12,12,22,18,12,14,14,14,14,14,14,14,16,60];
 function rowMain(o){return[R.STATUS_LABEL[o.status]||o.status,o.fakturPJ,o.fakturUM,R.MATCH_LABEL[o.matchType]||o.matchType,o.tanggal,o.tglFakturUM,o.customer,o.alamat,o.sales,o.bayarPJ,o.jenisUM,o.katPJ.join('/'),o.katUMAmt.join('/'),o.invoiceTotal,o.paidTotal,o.sisa,o.ketUM,(o.catatan||[]).join(' | ')];}
@@ -830,57 +938,73 @@ function buildRecapWB(){
 function exportRecap(){if(!state.result)return;try{var wb=buildRecapWB();XLSX.writeFile(wb,'Rekonsiliasi_Penjualan_UangMasuk_'+new Date().toISOString().slice(0,10)+'.xlsx');setStatus('File hasil rekonsiliasi diunduh.','ok');}catch(e){setStatus('Gagal membuat file: '+e.message,'error');}}
 function exportTwoSheets(){if(!state.result)return;try{var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,sheetFrom([HEAD_MAIN].concat(state.result.invoices.map(rowMain)),WIDTHS),'Rekap Per Faktur');var umHead=['Tanggal','Jenis','Sales','Penerima','No Faktur (asli)','Dipasangkan ke Faktur','Nama Toko','Alamat','Tagihan','Kategori','Ket','Dibayar','Status Faktur'];var aoa=[umHead].concat(state.result.umRows.map(function(r){return[r.tanggal,r.jenis,r.sales,r.penerima,r.fakturRaw,r.fakturFinal,r.toko,r.alamat,r.tagihan,r.kategori,r.ket,r.total,R.STATUS_LABEL[r.status]||r.status||'']; }));XLSX.utils.book_append_sheet(wb,sheetFrom(aoa,[12,11,14,12,20,20,22,18,13,16,12,14,20]),'Rincian Baris Uang Masuk');XLSX.writeFile(wb,'Rekonsiliasi_2Sheet_'+new Date().toISOString().slice(0,10)+'.xlsx');setStatus('File 2 sheet diunduh.','ok');}catch(e){setStatus('Gagal membuat file: '+e.message,'error');}}
 function exportOne(o){try{var wb=XLSX.utils.book_new();var aoa=[['FORMULIR KONFIRMASI PEMBAYARAN'],[],['Status',R.STATUS_LABEL[o.status]||o.status],['No Faktur Penjualan',o.fakturPJ||'—'],['No Faktur Uang Masuk',o.fakturUM||'—'],['Cara cocok',R.MATCH_LABEL[o.matchType]||o.matchType],['Tanggal',o.tanggal||'—'],['Toko / Customer',o.customer||'—'],['Alamat',o.alamat||'—'],['Sales',o.sales||'—'],['Pembayaran (Penjualan)',o.bayarPJ||'—'],['Jenis (Uang Masuk)',o.jenisUM||'—'],['Penerima (Uang Masuk)',o.penerimaUM||'—'],[],['Nilai Tagihan',o.invoiceTotal],['Sudah Dibayar',o.paidTotal],['Sisa',o.sisa],[],['CATATAN PEMERIKSAAN']];if(o.catatan&&o.catatan.length)o.catatan.forEach(function(c){aoa.push([c]);});else aoa.push(['Tidak ada kejanggalan yang terdeteksi.']);aoa.push([]);aoa.push(['Tanda tangan pemeriksa','............................']);aoa.push(['Tanggal periksa','............................']);XLSX.utils.book_append_sheet(wb,sheetFrom(aoa,[30,60]),'Konfirmasi');if(o.pjLines&&o.pjLines.length){XLSX.utils.book_append_sheet(wb,sheetFrom([['Produk','Qty','Kategori','Nilai']].concat(o.pjLines.map(function(l){return[l.produk,l.qty,l.kategori,l.total];})),[30,8,12,14]),'Barang');}if(o.umRows&&o.umRows.length){XLSX.utils.book_append_sheet(wb,sheetFrom([['Tanggal','Jenis','Kategori','Ket','Tagihan','Dibayar']].concat(o.umRows.map(function(r){return[r.tanggal,r.jenis,r.kategori,r.ket,r.tagihan,r.total];})),[12,12,16,12,14,14]),'Pembayaran');}XLSX.writeFile(wb,'Konfirmasi_'+(o.fakturPJ||o.key)+'.xlsx');setStatus('Formulir konfirmasi diunduh.','ok');}catch(e){setStatus('Gagal membuat file: '+e.message,'error');}}
+
 function sampleWB(){
   var pj=[['TANGGAL','NO. FAKTUR','PRODUK','QTY','SATUAN','TOTAL','SALES','PEMBAYARAN','CUSTOMER','ALAMAT'],['19/9/2026','011003260900750','FITRI BOTOL 800ML',10,'PCS',500000,'HAFID','TEMPO','TOKO MAKMUR','KENTENG'],['19/9/2026','011003260900751','MIE IKAT KECIL',50,'IKT',1161250,'RAJU','CASH','TOKO BARU JAYA','BOCOR'],['19/9/2026','011003260900752','SHZ KIREI 85GR',12,'PCS',52800,'HAFID','TEMPO','TOKO AISYAH','PASAR KENTENG'],['20/9/2026','011003260900753','FITRI BOTOL 400ML',20,'PCS',640000,'JOSSY','TEMPO','TOKO SUROJOYO','GUNUNGSARI'],['20/9/2026','011003260900754','SAMBAL CABE 500GR',5,'PCS',175000,'JOSSY','CASH','TOKO BU SITI','LOGANDU'],['20/9/2026','011003260900755','FITRI BOTOL 200ML',24,'PCS',384000,'HAFID','TEMPO','TOKO WALUYO','WIROMARTAN']];
   var um=[['Tanggal','Jenis','Sales','Penerima','No Faktur','Nama Toko','Alamat','Tgl Faktur','JT','Tagihan','Kategori/Pembayaran','Minyak_Cash','Minyak_Transfer','Rupa2_Cash','Rupa2_Transfer','Ket','Total'],['2026-09-21','Piutang','HAFID','','011003260900750','TOKO MAKMUR','KENTENG','2026-09-19','2026-10-01',500000,'MinyakCash',500000,0,0,0,'LUNAS',500000],['2026-09-21','Dropping','RAJU','ZEIN','011003260900751','TOKO BARU JAYA','BOCOR','2026-09-19','',1161250,'Rupa2Cash',0,0,1161250,0,'LUNAS',1161250],['2026-09-21','Piutang','HAFID','','01100326090075','TOKO AISYAH','PASAR KENTENG','2026-09-19','2026-10-01',52800,'MinyakCash',52800,0,0,0,'LUNAS',52800],['2026-09-21','Piutang','JOSSY','','0110032609007530','TOKO SUROJOYO','GUNUNGSARI','2026-09-20','2026-10-02',640000,'MinyakCash',300000,0,0,0,'TITIP',300000],['2026-09-21','Dropping','JOSSY','ALIM','011003260900754','TOKO BU SITI','LOGANDU','2026-09-20','',175000,'MinyakCash',175000,0,0,0,'LUNAS',175000],['2026-09-21','Piutang','HAFID','','011003260899999','TOKO LAMA','TEROK','2026-08-10','2026-08-25',400000,'MinyakCash',250000,0,0,0,'TITIP',250000],['2026-09-21','Piutang','HAFID','','011003260900753','TOKO SUROJOYO','GUNUNGSARI','2026-09-20','2026-10-02',640000,'MinyakCash',640000,0,0,0,'LUNAS',640000]];
   function mk(aoa){var ws=XLSX.utils.aoa_to_sheet(aoa);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Data');return wb;}
   return{pj:mk(pj),um:mk(um)};
 }
-function loadSample(){if(typeof XLSX==='undefined'){setStatus('Pembaca Excel (XLSX) belum termuat.','error');return;}var sb=sampleWB();loadSheetInto('PJ',sb.pj,'Data','contoh-penjualan.xlsx');loadSheetInto('UM',sb.um,'Data','contoh-uang-masuk.xlsx');['PJ','UM'].forEach(function(k){var z=document.getElementById('drop-'+k);z.classList.add('is-loaded');z.querySelector('.dz-file').textContent=state[k].fileName;z.querySelector('.dz-file').hidden=false;});updateRunButton();setStatus('Contoh data dimuat. Tekan "Cocokkan sekarang".','ok');}
+function loadSample(){
+  if(typeof XLSX==='undefined'){setStatus('Pembaca Excel (XLSX) belum termuat.','error');return;}
+  var sb=sampleWB();
+  loadSheetInto('PJ',sb.pj,'Data','contoh-penjualan.xlsx');
+  loadSheetInto('UM',sb.um,'Data','contoh-uang-masuk.xlsx');
+  ['PJ','UM'].forEach(function(k){
+    var z=document.getElementById('drop-'+k);z.classList.add('is-loaded');
+    z.querySelector('.dz-file').textContent=state[k].fileName;z.querySelector('.dz-file').hidden=false;
+  });
+  updateRunButton();
+  // Simpan juga contoh ke IndexedDB
+  Promise.all([
+    RekoDB.saveFile('PJ',{fileName:'contoh-penjualan.xlsx',sheet:'Data',headerRow:state.PJ.headerRow,headers:state.PJ.headers,rows:state.PJ.rows,cols:state.PJ.cols}),
+    RekoDB.saveFile('UM',{fileName:'contoh-uang-masuk.xlsx',sheet:'Data',headerRow:state.UM.headerRow,headers:state.UM.headers,rows:state.UM.rows,cols:state.UM.cols})
+  ]).catch(function(e){console.warn('Gagal simpan contoh ke IndexedDB:',e);});
+  setStatus('Contoh data dimuat. Tekan "Cocokkan sekarang".','ok');
+}
 
-/* ============ IndexedDB persistent ============ */
-var DB_NAME='rekonsiliasi_db',DB_VER=1,_db=null;
-function openDB(){if(_db)return Promise.resolve(_db);return new Promise(function(resolve,reject){var req=indexedDB.open(DB_NAME,DB_VER);req.onupgradeneeded=function(e){var db=e.target.result;if(!db.objectStoreNames.contains('files'))db.createObjectStore('files',{keyPath:'id'});if(!db.objectStoreNames.contains('runs')){var s=db.createObjectStore('runs',{keyPath:'id',autoIncrement:true});s.createIndex('savedAt','savedAt');}if(!db.objectStoreNames.contains('invoices')){var si=db.createObjectStore('invoices',{keyPath:'id',autoIncrement:true});si.createIndex('runId','runId');si.createIndex('status','status');si.createIndex('fakturPJ','fakturPJ');si.createIndex('fakturUM','fakturUM');si.createIndex('customer','customer');}};req.onsuccess=function(){_db=req.result;resolve(_db);};req.onerror=function(){reject(req.error);};});}
-function idbGet(store,key){return openDB().then(function(db){return new Promise(function(res,rej){var r=db.transaction(store,'readonly').objectStore(store).get(key);r.onsuccess=function(){res(r.result);};r.onerror=function(){rej(r.error);};});});}
-function idbGetAll(store,indexName,key){return openDB().then(function(db){return new Promise(function(res,rej){var s=db.transaction(store,'readonly').objectStore(store);var r=indexName?s.index(indexName).getAll(key):s.getAll();r.onsuccess=function(){res(r.result);};r.onerror=function(){rej(r.error);};});});}
-function idbPut(store,val){return openDB().then(function(db){return new Promise(function(res,rej){var t=db.transaction(store,'readwrite');t.objectStore(store).put(val);t.oncomplete=function(){res(true);};t.onerror=function(){rej(t.error);};t.onabort=function(){rej(t.error);};});});}
-function idbAdd(store,val){return openDB().then(function(db){return new Promise(function(res,rej){var t=db.transaction(store,'readwrite');var r=t.objectStore(store).add(val);r.onsuccess=function(){res(r.result);};t.onerror=function(){rej(t.error);};t.onabort=function(){rej(t.error);};});});}
-function idbClear(store){return openDB().then(function(db){return new Promise(function(res,rej){var t=db.transaction(store,'readwrite');t.objectStore(store).clear();t.oncomplete=function(){res(true);};t.onerror=function(){rej(t.error);};});});}
-var RekoDB={
-  ready:openDB,
-  saveFile:function(kind,payload){return idbPut('files',Object.assign({id:kind,savedAt:Date.now()},payload));},
-  loadFile:function(kind){return idbGet('files',kind);},
-  clearFiles:function(){return idbClear('files');},
-  saveRun:function(result,filesMeta){
-    var flat=result.invoices.map(function(o){return{runId:null,key:o.key,fakturPJ:o.fakturPJ,fakturUM:o.fakturUM,tanggal:o.tanggal,tglFakturUM:o.tglFakturUM,customer:o.customer,alamat:o.alamat,sales:o.sales,bayarPJ:o.bayarPJ,jenisUM:o.jenisUM,penerimaUM:o.penerimaUM,katPJ:o.katPJ,katUMAmt:o.katUMAmt,invoiceTotal:o.invoiceTotal,paidTotal:o.paidTotal,sisa:o.sisa,status:o.status,matchType:o.matchType,catatan:o.catatan,kategoriCocok:o.kategoriCocok,jenisCocok:o.jenisCocok};});
-    return idbAdd('runs',{savedAt:Date.now(),periode:result.stats.periode,stats:result.stats,files:filesMeta||{},jumlahInvoice:flat.length}).then(function(runId){
-      flat.forEach(function(o){o.runId=runId;});
-      return openDB().then(function(db){return new Promise(function(res,rej){var t=db.transaction('invoices','readwrite');var s=t.objectStore('invoices');flat.forEach(function(o){s.put(o);});t.oncomplete=function(){res(runId);};t.onerror=function(){rej(t.error);};t.onabort=function(){rej(t.error);};});});
-    });
-  },
-  latestRun:function(){return idbGetAll('runs').then(function(rs){rs.sort(function(a,b){return b.savedAt-a.savedAt;});return rs[0]||null;});},
-  invoicesOfRun:function(runId){return idbGetAll('invoices','runId',runId);},
-  allInvoices:function(){return idbGetAll('invoices');},
-  exportJSON:function(runId){return RekoDB.invoicesOfRun(runId).then(function(inv){return{runId:runId,invoices:inv};});},
-  restoreFromDB:function(){
-    return Promise.all([RekoDB.loadFile('PJ'),RekoDB.loadFile('UM')]).then(function(r){
-      var pj=r[0],um=r[1];
-      if(!pj&&!um)return null;
-      var restored={};
-      [['PJ',pj],['UM',um]].forEach(function(pair){
-        var kind=pair[0],saved=pair[1];if(!saved)return;
-        state[kind]={fileName:saved.fileName,wb:null,sheetNames:[saved.sheet],sheet:saved.sheet,headerRow:saved.headerRow||0,headers:saved.headers||[],rows:saved.rows||[],cols:saved.cols||{}};
-        renderFileInfo(kind);renderColMap(kind);
-        var z=document.getElementById('drop-'+kind);z.classList.add('is-loaded');z.querySelector('.dz-file').textContent=saved.fileName;z.querySelector('.dz-file').hidden=false;
-        restored[kind]=true;
-      });
-      updateRunButton();
-      return restored;
-    });
-  }
-};
-window.RekoDB=RekoDB;
+/* ===== Restore dari IndexedDB ===== */
+function restoreFromDB(){
+  return Promise.all([
+    RekoDB.loadFile('PJ'),
+    RekoDB.loadFile('UM'),
+    idbGet('files','lastResult')
+  ]).then(function(r){
+    var pj=r[0],um=r[1],lastResult=r[2];
+    var anyRestored=false;
+    if(pj){
+      state.PJ={fileName:pj.fileName,wb:null,sheetNames:[pj.sheet||'Data'],sheet:pj.sheet||'Data',headerRow:pj.headerRow||0,headers:pj.headers||[],rows:pj.rows||[],cols:pj.cols||{}};
+      renderFileInfo('PJ');renderColMap('PJ');
+      var zPJ=document.getElementById('drop-PJ');zPJ.classList.add('is-loaded');
+      zPJ.querySelector('.dz-file').textContent=pj.fileName;zPJ.querySelector('.dz-file').hidden=false;
+      anyRestored=true;
+    }
+    if(um){
+      state.UM={fileName:um.fileName,wb:null,sheetNames:[um.sheet||'Data'],sheet:um.sheet||'Data',headerRow:um.headerRow||0,headers:um.headers||[],rows:um.rows||[],cols:um.cols||{}};
+      renderFileInfo('UM');renderColMap('UM');
+      var zUM=document.getElementById('drop-UM');zUM.classList.add('is-loaded');
+      zUM.querySelector('.dz-file').textContent=um.fileName;zUM.querySelector('.dz-file').hidden=false;
+      anyRestored=true;
+    }
+    updateRunButton();
+    // Pulihkan hasil terakhir bila ada
+    if(lastResult&&lastResult.result&&lastResult.result.invoices&&lastResult.result.invoices.length){
+      state.result=lastResult.result;
+      render();
+      showHasilSection();
+      $('#btn-reset').hidden=false;
+      $('#btn-save-db').hidden=false;
+      updateTabBadges();
+      setStatus('Data & hasil rekonsiliasi dipulihkan dari IndexedDB (run #'+(lastResult.runId||'?')+').','ok');
+      setTimeout(function(){switchTab('tab-ringkasan');},100);
+    } else if(anyRestored){
+      setStatus('File dipulihkan dari IndexedDB. Klik "Cocokkan sekarang" untuk memproses ulang.','ok');
+    }
+    return anyRestored;
+  });
+}
 
+/* ===== Init ===== */
 function init(){
   bindSummaryClicks();wireDropzone('PJ');wireDropzone('UM');
   document.querySelectorAll('.tab-btn').forEach(function(b){b.addEventListener('click',function(){switchTab(b.getAttribute('data-tab'));});});
@@ -891,9 +1015,55 @@ function init(){
   var p2=document.getElementById('periode-info-2');var p1=document.getElementById('periode-info');
   if(p2&&p1){try{var obs=new MutationObserver(function(){p2.textContent=p1.textContent;});obs.observe(p1,{childList:true,characterData:true,subtree:true});}catch(e){}}
   hideHasilSection();updateTabBadges();switchTab('tab-unduh');
+
   $('#btn-run').addEventListener('click',run);
   $('#btn-contoh').addEventListener('click',loadSample);
-  $('#btn-reset').addEventListener('click',function(){state.PJ=null;state.UM=null;state.result=null;['PJ','UM'].forEach(function(k){var z=document.getElementById('drop-'+k);z.classList.remove('is-loaded');z.querySelector('.dz-file').hidden=true;document.getElementById('info-'+k).hidden=true;document.getElementById('colmap-'+k).hidden=true;document.getElementById('colmap-'+k).innerHTML='';});hideHasilSection();$('#btn-reset').hidden=true;updateRunButton();setStatus('Silakan unggah file baru.','');window.scrollTo({top:0,behavior:'smooth'});});
+  $('#btn-reset').addEventListener('click',function(){
+    state.PJ=null;state.UM=null;state.result=null;
+    ['PJ','UM'].forEach(function(k){
+      var z=document.getElementById('drop-'+k);z.classList.remove('is-loaded');
+      z.querySelector('.dz-file').hidden=true;
+      document.getElementById('info-'+k).hidden=true;
+      document.getElementById('colmap-'+k).hidden=true;
+      document.getElementById('colmap-'+k).innerHTML='';
+    });
+    hideHasilSection();$('#btn-reset').hidden=true;$('#btn-save-db').hidden=true;
+    updateRunButton();setStatus('Silakan unggah file baru.','');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+
+  // Tombol manual: Muat dari IndexedDB
+  var btnLoadDb=document.getElementById('btn-load-db');
+  if(btnLoadDb)btnLoadDb.addEventListener('click',function(){
+    setStatus('Memuat dari IndexedDB …');
+    restoreFromDB().then(function(ok){
+      if(!ok)setStatus('Tidak ada data tersimpan di IndexedDB.','error');
+    }).catch(function(e){setStatus('Gagal memuat: '+e.message,'error');});
+  });
+
+  // Tombol manual: Simpan ke IndexedDB
+  var btnSaveDb=document.getElementById('btn-save-db');
+  if(btnSaveDb)btnSaveDb.addEventListener('click',function(){
+    if(!state.result){setStatus('Belum ada hasil untuk disimpan.','error');return;}
+    setStatus('Menyimpan …');
+    Promise.all([
+      state.PJ?RekoDB.saveFile('PJ',{fileName:state.PJ.fileName,sheet:state.PJ.sheet,headerRow:state.PJ.headerRow,headers:state.PJ.headers,rows:state.PJ.rows,cols:state.PJ.cols}):Promise.resolve(),
+      state.UM?RekoDB.saveFile('UM',{fileName:state.UM.fileName,sheet:state.UM.sheet,headerRow:state.UM.headerRow,headers:state.UM.headers,rows:state.UM.rows,cols:state.UM.cols}):Promise.resolve(),
+      RekoDB.saveRun(state.result,{pjFile:state.PJ?state.PJ.fileName:'',umFile:state.UM?state.UM.fileName:''})
+    ]).then(function(r){
+      setStatus('Tersimpan di IndexedDB (run #'+(r[2]||'?')+').','ok');
+    }).catch(function(e){setStatus('Gagal simpan: '+e.message,'error');});
+  });
+
+  // Tombol: Hapus data tersimpan
+  var btnClearDb=document.getElementById('btn-clear-db');
+  if(btnClearDb)btnClearDb.addEventListener('click',function(){
+    if(!confirm('Hapus SEMUA data tersimpan di IndexedDB (file + hasil)?'))return;
+    RekoDB.clearAll().then(function(){
+      setStatus('Data IndexedDB dihapus.','ok');
+    }).catch(function(e){setStatus('Gagal hapus: '+e.message,'error');});
+  });
+
   $('#search-input').addEventListener('input',function(){state.search=this.value.trim();if(state.result)renderTable();});
   $('#sales-filter').addEventListener('change',function(){state.sales=this.value;if(state.result)renderTable();});
   $('#sort-select').addEventListener('change',function(){state.sort=this.value;if(state.result)renderTable();});
@@ -903,7 +1073,9 @@ function init(){
   $('#detail-modal').addEventListener('click',function(e){if(e.target.closest('[data-close]'))closeDetail();});
   document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDetail();});
   updateRunButton();
-  RekoDB.restoreFromDB().catch(function(){});
+
+  // Auto-restore saat halaman dibuka
+  restoreFromDB().catch(function(e){console.warn('Auto-restore gagal:',e);});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
