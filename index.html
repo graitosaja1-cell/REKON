@@ -113,11 +113,14 @@ a{color:var(--brand)}
 .filters::-webkit-scrollbar-track{background:transparent}
 .filters::-webkit-scrollbar-thumb{background:var(--line);border-radius:999px}
 .filters::-webkit-scrollbar-thumb:hover{background:#c3ced6}
-.chip{font:inherit;font-size:.74rem;font-weight:600;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink-2);border-radius:999px;padding:.3rem .62rem;display:inline-flex;align-items:center;gap:.3rem;flex-shrink:0;white-space:nowrap;transition:border-color .15s,color .15s,background .15s}
-.chip b{font-size:.7rem;background:var(--line-2);border-radius:999px;padding:0 .35rem;line-height:1.4}
-.chip:hover{border-color:var(--brand);color:var(--brand-2)}
+/* ==== CHIP: efek glow biru saat hover (sesuai gambar 2) ==== */
+.chip{font:inherit;font-size:.74rem;font-weight:600;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink-2);border-radius:999px;padding:.3rem .62rem;display:inline-flex;align-items:center;gap:.3rem;flex-shrink:0;white-space:nowrap;transition:border-color .25s,color .25s,background .25s,box-shadow .25s}
+.chip b{font-size:.7rem;background:var(--line-2);border-radius:999px;padding:0 .35rem;line-height:1.4;transition:background .25s,color .25s}
+.chip:hover{background-color:#1e3a8a;border-color:#3b82f6;box-shadow:0 0 20px rgba(59,130,246,.8),inset 0 0 10px rgba(59,130,246,.5);color:#bfdbfe}
+.chip:hover b{background-color:#3b82f6;color:#fff}
 .chip.is-active{background:var(--brand);border-color:var(--brand);color:#fff}
 .chip.is-active b{background:rgba(255,255,255,.25);color:#fff}
+/* ==== AKHIR CHIP ==== */
 .tools{display:flex;flex-wrap:nowrap;gap:.35rem;align-items:center;width:100%;overflow-x:auto;padding-bottom:.15rem;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
 .tools::-webkit-scrollbar{height:4px}
 .tools::-webkit-scrollbar-thumb{background:var(--line);border-radius:999px}
@@ -210,10 +213,8 @@ tbody tr{cursor:pointer}tbody tr:hover{background:#f7fbfc}tbody tr:last-child td
 #tab-ringkasan.section{padding-top:.85rem !important;padding-bottom:1.5rem !important}
 #tab-ringkasan .hasil-head{margin-bottom:.4rem}
 #tab-ringkasan .hasil-head h2{font-size:.98rem;font-weight:600;letter-spacing:0}
-/* ============ TAB UNGGAH: judul & paragraf lebih ringkas ============ */
-#tab-unduh.section{padding-top:1rem;padding-bottom:1.4rem}
-#tab-unduh h1{font-size:1.1rem;font-weight:600;margin:0 0 .35rem;letter-spacing:-.005em;line-height:1.3}
-#tab-unduh .lead{font-size:.82rem;line-height:1.5;max-width:75ch;color:var(--ink-2);margin:0}
+/* ============ TAB UNGGAH: judul & paragraf dihapus, padding dirapatkan ============ */
+#tab-unduh.section{padding-top:.6rem;padding-bottom:1.4rem}
 /* ============ MODE GELAP ============ */
 html[data-theme="dark"]{
   --ink:#e6eef3;
@@ -259,7 +260,8 @@ html[data-theme="dark"] .chip,
 html[data-theme="dark"] .btn-dots{background:var(--card);border-color:var(--line);color:var(--ink-2)}
 html[data-theme="dark"] .search input{color:var(--ink)}
 html[data-theme="dark"] .sel select{color:var(--ink)}
-html[data-theme="dark"] .chip:hover{border-color:var(--brand);color:var(--brand-2)}
+html[data-theme="dark"] .chip:hover{background-color:#1e3a8a;border-color:#3b82f6;box-shadow:0 0 20px rgba(59,130,246,.85),inset 0 0 10px rgba(59,130,246,.5);color:#bfdbfe}
+html[data-theme="dark"] .chip:hover b{background-color:#3b82f6;color:#fff}
 html[data-theme="dark"] .chip.is-active{background:var(--brand);border-color:var(--brand);color:#0b1a1a}
 html[data-theme="dark"] .chip.is-active b{background:rgba(0,0,0,.25);color:#0b1a1a}
 html[data-theme="dark"] .btn-dots:hover,
@@ -330,8 +332,6 @@ html[data-theme="dark"] .filters::-webkit-scrollbar-thumb:hover{background:#3a4d
 <main>
   <section id="tab-unduh" class="tab-panel section" data-tab-panel="tab-unduh">
     <div class="wrap">
-      <h1>Periksa mana faktur yang sudah dibayar dan mana yang belum</h1>
-      <p class="lead">Unggah dua file Excel: <strong>data Penjualan</strong> dan <strong>data Uang Masuk</strong>. Alat ini mencocokkan keduanya <em>bukan hanya lewat nomor faktur</em>, tetapi juga lewat <strong>nominal</strong>, <strong>nama toko/customer</strong>, <strong>alamat</strong>, <strong>sales</strong>, <strong>kategori produk</strong> (Minyak / Rupa-rupa) dan <strong>jenis pembayaran</strong> (Cash -> Dropping, Tempo -> Piutang). Semua proses berjalan di komputer/handphone Anda sendiri - file tidak diunggah ke mana pun.</p>
       <div class="drop-grid">
         <article class="drop-card" data-kind="PJ">
           <header><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i><h2>1. Data Penjualan</h2></header>
