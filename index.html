@@ -17,9 +17,9 @@ code{background:var(--line-2);border:1px solid var(--line);border-radius:5px;pad
 a{color:var(--brand)}
 .wrap{width:min(1220px,100% - 2rem);margin-inline:auto}
 .topbar{background:linear-gradient(115deg,var(--brand),#0b5f74 60%,#123b57);color:#fff;position:sticky;top:0;z-index:20;box-shadow:0 2px 14px rgba(8,32,48,.18)}
-.topbar-inner{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.7rem 0}
-.brand{display:flex;align-items:center;gap:.75rem}.brand i{font-size:1.6rem;opacity:.9}
-.brand strong{display:block;font-size:1rem}.brand span{display:block;font-size:.76rem;opacity:.82}
+.topbar-inner{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.2rem 0}
+.brand{display:flex;align-items:center;gap:.75rem;text-align:left}
+.brand strong{display:block;font-size:1rem;line-height:1.2}
 .topnav{display:flex;gap:.35rem;font-size:.86rem;align-items:center}
 .topnav a{color:#fff;text-decoration:none;opacity:.85;display:inline-flex;align-items:center;gap:.4rem;padding:.32rem .75rem;border-radius:999px;transition:background .15s,opacity .15s;white-space:nowrap}
 .topnav a:hover{opacity:1;background:rgba(255,255,255,.12)}
@@ -181,6 +181,9 @@ tbody tr{cursor:pointer}tbody tr:hover{background:#f7fbfc}tbody tr:last-child td
 #tab-tabel .hasil-head h2{font-size:1rem;font-weight:600;letter-spacing:0}
 #tab-tabel .wrap{width:100%;max-width:none;padding-inline:.75rem}
 #tab-tabel .hasil-head{align-items:center;padding-inline:.25rem}
+/* Khusus untuk merapatkan tabel detail */
+#tab-tabel.section { padding-top: 0.25rem !important; padding-bottom: 1.5rem !important; }
+#tab-tabel .periode-container { display: flex; justify-content: flex-end; margin-bottom: 0.2rem; padding: 0 .25rem; }
 @media(max-width:900px){.summary-main{grid-template-columns:1fr 1fr}.summary-status-grid{grid-template-columns:1fr 1fr}.topnav{flex-wrap:wrap;gap:.25rem}}
 @media(max-width:860px){.topnav{display:none}.section{padding:1.6rem 0}.table-scroll{max-height:none}.colmap-grid{grid-template-columns:1fr}}
 @media(max-width:560px){body{font-size:14.5px}.summary-main{grid-template-columns:1fr}.summary-status-grid{grid-template-columns:1fr}table{font-size:.76rem}thead th,tbody td{padding:.4rem .45rem}.fk-v{font-size:.72rem}.search input{min-width:80px;max-width:110px}}
@@ -287,7 +290,7 @@ tbody tr{cursor:pointer}tbody tr:hover{background:#f7fbfc}tbody tr:last-child td
   </section>
   <section id="tab-tabel" class="tab-panel section" data-tab-panel="tab-tabel" hidden>
     <div class="wrap">
-      <div class="hasil-head" style="justify-content: flex-end;"><div class="periode" id="periode-info-2"></div></div>
+      <div class="periode-container"><div class="periode" id="periode-info-2"></div></div>
       <div class="toolbar">
         <div class="filters" id="filters" role="group" aria-label="Filter status">
           <button class="chip is-active" data-view="semua">Semua</button>
