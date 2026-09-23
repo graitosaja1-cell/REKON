@@ -18,8 +18,8 @@ a{color:var(--brand)}
 .wrap{width:min(1220px,100% - 2rem);margin-inline:auto}
 .topbar{background:linear-gradient(115deg,var(--brand),#0b5f74 60%,#123b57);color:#fff;position:sticky;top:0;z-index:20;box-shadow:0 2px 14px rgba(8,32,48,.18)}
 .topbar-inner{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.2rem 0}
-.brand{display:flex;align-items:center;gap:.75rem;text-align:left}
-.brand strong{display:block;font-size:1rem;line-height:1.2}
+.brand{display:flex;align-items:center;gap:.75rem;text-align:left;flex:1}
+.brand-text{display:block;font-size:1rem;line-height:1.2;font-weight:400;text-align:left;color:#fff}
 .topnav{display:flex;gap:.35rem;font-size:.86rem;align-items:center}
 .topnav a{color:#fff;text-decoration:none;opacity:.85;display:inline-flex;align-items:center;gap:.4rem;padding:.32rem .75rem;border-radius:999px;transition:background .15s,opacity .15s;white-space:nowrap}
 .topnav a:hover{opacity:1;background:rgba(255,255,255,.12)}
@@ -194,9 +194,7 @@ tbody tr{cursor:pointer}tbody tr:hover{background:#f7fbfc}tbody tr:last-child td
 <header class="topbar">
   <div class="wrap topbar-inner">
     <div class="brand">
-      <div>
-        <strong>Rekonsiliasi Penjualan vs Uang Masuk</strong>
-      </div>
+      <div class="brand-text">Rekonsiliasi Penjualan vs Uang Masuk</div>
     </div>
     <nav class="topnav" aria-label="Navigasi utama">
       <a href="#" data-tab-link="tab-unduh" class="is-active"><i class="fa-solid fa-cloud-arrow-up"></i> Unggah</a>
@@ -210,7 +208,7 @@ tbody tr{cursor:pointer}tbody tr:hover{background:#f7fbfc}tbody tr:last-child td
   <section id="tab-unduh" class="tab-panel section" data-tab-panel="tab-unduh">
     <div class="wrap">
       <h1>Periksa mana faktur yang sudah dibayar dan mana yang belum</h1>
-      <p class="lead">Unggah dua file Excel: <strong>data Penjualan</strong> dan <strong>data Uang Masuk</strong>. Alat ini mencocokkan keduanya <em>bukan hanya lewat nomor faktur</em>, tetapi juga lewat <strong>nominal</strong>, <strong>nama toko/customer</strong>, <strong>alamat</strong>, <strong>sales</strong>, <strong>kategori produk</strong> (Minyak / Rupa-rupa) dan <strong>jenis pembayaran</strong> (Cash ‚Üí Dropping, Tempo ‚Üí Piutang). Semua proses berjalan di komputer/handphone Anda sendiri ‚Äî file tidak diunggah ke mana pun.</p>
+      <p class="lead">Unggah dua file Excel: <strong>data Penjualan</strong> dan <strong>data Uang Masuk</strong>. Alat ini mencocokkan keduanya <em>bukan hanya lewat nomor faktur</em>, tetapi juga lewat <strong>nominal</strong>, <strong>nama toko/customer</strong>, <strong>alamat</strong>, <strong>sales</strong>, <strong>kategori produk</strong> (Minyak / Rupa-rupa) dan <strong>jenis pembayaran</strong> (Cash -> Dropping, Tempo -> Piutang). Semua proses berjalan di komputer/handphone Anda sendiri - file tidak diunggah ke mana pun.</p>
       <div class="drop-grid">
         <article class="drop-card" data-kind="PJ">
           <header><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i><h2>1. Data Penjualan</h2></header>
@@ -246,7 +244,7 @@ tbody tr{cursor:pointer}tbody tr:hover{background:#f7fbfc}tbody tr:last-child td
             <input type="checkbox" id="opt-loose">
             <span>
               <strong>Mode Pencocokan Longgar</strong>
-              <small>Cocokkan walau nomor faktur beda bulan / beda jauh ‚Äî pakai <b>nama toko + alamat + kategori (FITRI=Minyak) + jenis (TEMPO‚ÜíPiutang) + nominal</b>. Hasil diberi tanda <em>Perlu dicek</em>.</small>
+              <small>Cocokkan walau nomor faktur beda bulan / beda jauh - pakai <b>nama toko + alamat + kategori (FITRI=Minyak) + jenis (TEMPO->Piutang) + nominal</b>. Hasil diberi tanda <em>Perlu dicek</em>.</small>
             </span>
           </label>
           <label class="opt">
@@ -279,7 +277,7 @@ tbody tr{cursor:pointer}tbody tr:hover{background:#f7fbfc}tbody tr:last-child td
         <div class="summary-status-grid" id="summary-status-grid"></div>
       </div>
       <div class="summary-section attention-section">
-        <div class="summary-section-head"><div><h3>‚öÝ Perlu Perhatian</h3><p>Hal-hal yang sebaiknya diperiksa lebih lanjut.</p></div></div>
+        <div class="summary-section-head"><div><h3>! Perlu Perhatian</h3><p>Hal-hal yang sebaiknya diperiksa lebih lanjut.</p></div></div>
         <div class="issue-strip" id="issue-strip"></div>
       </div>
       <div class="actions-row" style="margin-top:.4rem">
@@ -344,8 +342,8 @@ tbody tr{cursor:pointer}tbody tr:hover{background:#f7fbfc}tbody tr:last-child td
     <div class="wrap panduan">
       <h2>Panduan singkat</h2>
       <div class="panduan-grid">
-        <article><h3><i class="fa-solid fa-1"></i> Cara alat ini mencocokkan</h3><ol><li><strong>Nomor faktur sama</strong> ‚Üí dianggap satu tagihan (versi paling kuat).</li><li><strong>Nomor faktur beda sedikit</strong> (kurang/lebih 1 angka) ‚Üí dipasangkan otomatis dan ditandai <em>Salah Ketik</em>.</li><li><strong>Nomor faktur mirip</strong> (beda 1 angka / dua angka tertukar) ‚Üí digabungkan hanya bila nama toko atau alamat mendukung.</li><li><strong>Nomor faktur beda jauh</strong>, tetapi nama toko + alamat + tanggal + nominal sama ‚Üí dipasangkan dengan tanda <em>Cocok via Toko/Nominal</em>.</li><li><strong>Mode Longgar</strong> (opsional) ‚Üí cocokkan walau nomor faktur beda bulan, dengan bukti: toko + alamat + kategori + jenis + nominal.</li><li><strong>Abaikan Faktur</strong> (opsional) ‚Üí cocokkan murni dari data non-faktur (untuk periode berbeda).</li></ol></article>
-        <article><h3><i class="fa-solid fa-2"></i> Aturan kategori &amp; jenis</h3><ul><li><strong>Produk mengandung "FITRI"</strong> ‚Üí kategori <strong>Minyak</strong>; produk lain ‚Üí <strong>Rupa-rupa</strong>.</li><li><strong>Penjualan PEMBAYARAN = CASH</strong> ‚Üí uang masuk harus <strong>Dropping</strong>.</li><li><strong>Penjualan PEMBAYARAN = TEMPO</strong> ‚Üí uang masuk harus <strong>Piutang</strong>.</li><li>Kategori uang masuk dibaca dari kolom nominal (Minyak_Cash, Minyak_Transfer, Rupa2_Cash, Rupa2_Transfer).</li></ul></article>
+        <article><h3><i class="fa-solid fa-1"></i> Cara alat ini mencocokkan</h3><ol><li><strong>Nomor faktur sama</strong> -> dianggap satu tagihan (versi paling kuat).</li><li><strong>Nomor faktur beda sedikit</strong> (kurang/lebih 1 angka) -> dipasangkan otomatis dan ditandai <em>Salah Ketik</em>.</li><li><strong>Nomor faktur mirip</strong> (beda 1 angka / dua angka tertukar) -> digabungkan hanya bila nama toko atau alamat mendukung.</li><li><strong>Nomor faktur beda jauh</strong>, tetapi nama toko + alamat + tanggal + nominal sama -> dipasangkan dengan tanda <em>Cocok via Toko/Nominal</em>.</li><li><strong>Mode Longgar</strong> (opsional) -> cocokkan walau nomor faktur beda bulan, dengan bukti: toko + alamat + kategori + jenis + nominal.</li><li><strong>Abaikan Faktur</strong> (opsional) -> cocokkan murni dari data non-faktur (untuk periode berbeda).</li></ol></article>
+        <article><h3><i class="fa-solid fa-2"></i> Aturan kategori &amp; jenis</h3><ul><li><strong>Produk mengandung "FITRI"</strong> -> kategori <strong>Minyak</strong>; produk lain -> <strong>Rupa-rupa</strong>.</li><li><strong>Penjualan PEMBAYARAN = CASH</strong> -> uang masuk harus <strong>Dropping</strong>.</li><li><strong>Penjualan PEMBAYARAN = TEMPO</strong> -> uang masuk harus <strong>Piutang</strong>.</li><li>Kategori uang masuk dibaca dari kolom nominal (Minyak_Cash, Minyak_Transfer, Rupa2_Cash, Rupa2_Transfer).</li></ul></article>
         <article><h3><i class="fa-solid fa-3"></i> Sisa / tagihan bulan lalu</h3><p>Uang masuk sering memuat faktur bulan lalu yang tidak ada di file penjualan periode ini. Baris seperti itu diberi status <em>Faktur tidak ada di Penjualan</em> dengan catatan <em>Tagihan bulan lalu</em>, dan sisa dihitung dari kolom <strong>Tagihan</strong> di uang masuk.</p></article>
         <article><h3><i class="fa-solid fa-4"></i> Kolom yang dikenali otomatis</h3><p>Nama kolom boleh berbeda ejaannya. Alat menebak sendiri pasangan kolomnya: <code>No Faktur</code>, <code>Tanggal</code>, <code>Tagihan</code>, <code>Total</code>, <code>Nama Toko</code>, <code>Customer</code>, <code>Alamat</code>, <code>Sales</code>, <code>Pembayaran</code>, <code>Jenis</code>, <code>Kategori/Pembayaran</code>, <code>Ket</code>, <code>PRODUK</code>. Jika salah, ganti kolom manual di bawah kotak unggah.</p></article>
         <article class="warn"><h3><i class="fa-solid fa-triangle-exclamation"></i> Batas alat ini</h3><p>Hasil cocok otomatis adalah <strong>usulan</strong>. Pasangan yang ditandai <em>Salah Ketik</em> / <em>Cocok via Toko</em> / <em>Perlu dicek</em> / <em>Mode Longgar</em> sebaiknya diverifikasi manusia sebelum dipakai untuk penagihan.</p></article>
@@ -354,7 +352,7 @@ tbody tr{cursor:pointer}tbody tr:hover{background:#f7fbfc}tbody tr:last-child td
     </div>
   </section>
 </main>
-<footer class="footer"><div class="wrap"><p>Alat rekonsiliasi penjualan &amp; uang masuk ¬∑ seluruh perhitungan berjalan di peramban Anda.</p></div></footer>
+<footer class="footer"><div class="wrap"><p>Alat rekonsiliasi penjualan &amp; uang masuk - seluruh perhitungan berjalan di peramban Anda.</p></div></footer>
 <div class="modal" id="detail-modal" hidden>
   <div class="modal-backdrop" data-close="1"></div>
   <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="detail-title">
@@ -493,7 +491,7 @@ function deletions(k){var out=[];if(k.length<8)return out;for(var i=0;i<k.length
 function differences(a,b){if(a.length!==b.length)return 99;var diff=0;for(var i=0;i<a.length;i++)if(a[i]!==b[i])diff++;return diff;}
 function isTransposition(a,b){if(a.length!==b.length)return false;var idx=[];for(var i=0;i<a.length;i++)if(a[i]!==b[i])idx.push(i);if(idx.length!==2)return false;return a[idx[0]]===b[idx[1]]&&a[idx[1]]===b[idx[0]]&&idx[1]===idx[0]+1;}
 /* =========================================================
-   EVIDENCE ‚Äî Skor bukti pencocokan
+   EVIDENCE - Skor bukti pencocokan
    ========================================================= */
 function evidence(p,u,opts){
   var sc=0,notes=[];
@@ -507,7 +505,7 @@ function evidence(p,u,opts){
   if(p.katSet&&u.katAmtSet&&p.katSet.length&&u.katAmtSet.length){
     katSama=sameSet(p.katSet,u.katAmtSet);
   }
-  /* Jenis pembayaran: CASH‚ÜíDropping, TEMPO‚ÜíPiutang */
+  /* Jenis pembayaran: CASH->Dropping, TEMPO->Piutang */
   var jenisCocok=null;
   if(p.bayar&&u.jenis){
     var harus=p.bayar==='CASH'?'Dropping':(p.bayar==='TEMPO'?'Piutang':'');
@@ -519,12 +517,12 @@ function evidence(p,u,opts){
   if(nom){sc+=3;notes.push('nominal sama');}
   if(tanggalOk){sc+=2;notes.push('tanggal faktur berdekatan');}
   if(katSama){sc+=2;notes.push('kategori ('+p.katSet.join('+')+') sama');}
-  if(jenisCocok===true){sc+=2;notes.push('jenis cocok ('+p.bayar+'‚Üí'+u.jenis+')');}
+  if(jenisCocok===true){sc+=2;notes.push('jenis cocok ('+p.bayar+'->'+u.jenis+')');}
   if(jenisCocok===false){sc-=1;notes.push('jenis TIDAK cocok ('+p.bayar+' vs '+u.jenis+')');}
   return{score:sc,notes:notes,nm:nm,al:al,nom:nom,tanggalOk:tanggalOk,katSama:katSama,jenisCocok:jenisCocok};
 }
 /* =========================================================
-   MATCHING ‚Äî 4 lapis + 2 lapis opsional (longgar / abaikan faktur)
+   MATCHING - 4 lapis + 2 lapis opsional (longgar / abaikan faktur)
    ========================================================= */
 function matchInvoices(pj,um,opts){
   var umToPj={},reason={},pjClaimed={};
@@ -548,7 +546,7 @@ function matchInvoices(pj,um,opts){
       deletions(uk).forEach(function(v){if(pj.map[v]&&!pjClaimed[v])cand.push(v);});
       cand=uniq(cand);
       if(cand.length===1){umToPj[uk]=cand[0];reason[uk]={tipe:'SALAH_KETIK',alasan:'No faktur kurang/lebih 1 angka'};pjClaimed[cand[0]]=true;}
-      else if(cand.length>1){reason[uk]={tipe:'PERLU_CEK',alasan:'Mirip '+cand.length+' faktur penjualan (beda 1 angka) ‚Äî belum dipastikan'};}
+      else if(cand.length>1){reason[uk]={tipe:'PERLU_CEK',alasan:'Mirip '+cand.length+' faktur penjualan (beda 1 angka) - belum dipastikan'};}
     });
   }
 
@@ -571,13 +569,13 @@ function matchInvoices(pj,um,opts){
   }
   function klaim(uk,c){
     umToPj[uk]=c.pk;
-    reason[uk]={tipe:'SALAH_KETIK',alasan:(c.typo==='TYPO_TUKAR'?'No faktur: dua angka tertukar':'No faktur: 1 angka salah ketik')+' ‚Äî dibuktikan '+c.ev.notes.join(', ')};
+    reason[uk]={tipe:'SALAH_KETIK',alasan:(c.typo==='TYPO_TUKAR'?'No faktur: dua angka tertukar':'No faktur: 1 angka salah ketik')+' - dibuktikan '+c.ev.notes.join(', ')};
     pjClaimed[c.pk]=true;
   }
   if(!ignoreFaktur){
     um.order.forEach(function(uk){
       if(umToPj[uk]||reason[uk])return;var cands=kandidatUntuk(uk);catatKandidat(uk,cands);
-      if(cands.length===1){var ev=cands[0].ev;if((ev.nm||ev.al)&&ev.score>=4)klaim(uk,cands[0]);else reason[uk]={tipe:'PERLU_CEK',alasan:'No faktur mirip 1 faktur penjualan, tetapi nama/nominal tidak mendukung ‚Äî perlu dicek',kandidat:candidatesAll[uk]};}
+      if(cands.length===1){var ev=cands[0].ev;if((ev.nm||ev.al)&&ev.score>=4)klaim(uk,cands[0]);else reason[uk]={tipe:'PERLU_CEK',alasan:'No faktur mirip 1 faktur penjualan, tetapi nama/nominal tidak mendukung - perlu dicek',kandidat:candidatesAll[uk]};}
     });
     um.order.forEach(function(uk){
       if(umToPj[uk]||reason[uk])return;var cands=kandidatUntuk(uk);
@@ -586,7 +584,7 @@ function matchInvoices(pj,um,opts){
       var buktiKuat=(top.ev.nm||top.ev.al)&&top.ev.score>=4;
       var unggulJelas=!runner||(top.peringkat-runner.peringkat)>=2;
       if(buktiKuat&&unggulJelas)klaim(uk,top);
-      else reason[uk]={tipe:'PERLU_CEK',alasan:'No faktur mirip '+cands.length+' faktur penjualan dengan bukti seimbang ‚Äî belum dipastikan',kandidat:candidatesAll[uk]};
+      else reason[uk]={tipe:'PERLU_CEK',alasan:'No faktur mirip '+cands.length+' faktur penjualan dengan bukti seimbang - belum dipastikan',kandidat:candidatesAll[uk]};
     });
   }
 
@@ -604,7 +602,7 @@ function matchInvoices(pj,um,opts){
     });
   }
 
-  /* --- LAPIS 5 (OPSIONAL): MODE LONGAR ‚Äî abaikan faktur, pakai toko+alamat+kategori+jenis+nominal --- */
+  /* --- LAPIS 5 (OPSIONAL): MODE LONGAR - abaikan faktur, pakai toko+alamat+kategori+jenis+nominal --- */
   if(loose || ignoreFaktur){
     um.order.forEach(function(uk){
       if(umToPj[uk]||(reason[uk]&&reason[uk].tipe!=='PERLU_CEK'))return;
@@ -633,13 +631,13 @@ function matchInvoices(pj,um,opts){
         umToPj[uk]=top.pk;
         reason[uk]={
           tipe:'COCOK_LONGGAR',
-          alasan:'MODE LONGAR ‚Äî faktur diabaikan, dicocokkan via '+(top.ev.notes.join(', '))+' (skor '+top.ev.score+')'
+          alasan:'MODE LONGAR - faktur diabaikan, dicocokkan via '+(top.ev.notes.join(', '))+' (skor '+top.ev.score+')'
         };
         pjClaimed[top.pk]=true;
       } else if(runner){
         reason[uk]={
           tipe:'PERLU_CEK',
-          alasan:'MODE LONGAR: ada '+kandidat.length+' kandidat (skor top='+top.ev.score+', runner-up='+runner.ev.score+') ‚Äî belum dipastikan',
+          alasan:'MODE LONGAR: ada '+kandidat.length+' kandidat (skor top='+top.ev.score+', runner-up='+runner.ev.score+') - belum dipastikan',
           kandidat:kandidat.slice(0,5).map(function(c){return{fakturPJ:c.fakturPJ,skor:c.ev.score,tipe:'longgar',bukti:c.ev.notes.join(', ')};})
         };
       }
@@ -821,7 +819,7 @@ function $(sel,root){return(root||document).querySelector(sel);}
 function esc(v){return String(v===null||v===undefined?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function rp(n){return nf.format(Math.round(n||0));}
 function fmtDate(iso){
-  if(!iso)return'‚Äî';
+  if(!iso)return'-';
   var m=String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/);
   if(!m)return iso;
   return m[3]+'/'+m[2]+'/'+m[1].slice(2);
@@ -841,7 +839,7 @@ function buildColMap(kind){var st=state[kind];var defs=FIELDS[kind];st.cols={};d
 function renderColMap(kind){
   var st=state[kind];var host=document.getElementById('colmap-'+kind);var defs=FIELDS[kind];
   var html='<h4>Pasangan kolom '+(kind==='PJ'?'Penjualan':'Uang Masuk')+'</h4><div class="colmap-grid">';
-  defs.forEach(function(d){var cur=st.cols[d.k]||'';html+='<label>'+esc(d.label)+'<select data-kind="'+kind+'" data-field="'+d.k+'"'+(cur?'':' class="is-missing"')+'><option value="">‚Äî tidak dipakai ‚Äî</option>'+st.headers.map(function(h){return'<option value="'+esc(h)+'"'+(h===cur?' selected':'')+'>'+esc(h)+'</option>';}).join('')+'</select></label>';});
+  defs.forEach(function(d){var cur=st.cols[d.k]||'';html+='<label>'+esc(d.label)+'<select data-kind="'+kind+'" data-field="'+d.k+'"'+(cur?'':' class="is-missing"')+'><option value="">- tidak dipakai -</option>'+st.headers.map(function(h){return'<option value="'+esc(h)+'"'+(h===cur?' selected':'')+'>'+esc(h)+'</option>';}).join('')+'</select></label>';});
   html+='</div>';host.innerHTML=html;host.hidden=false;
   host.querySelectorAll('select').forEach(function(sel){sel.addEventListener('change',function(){
     var k=sel.getAttribute('data-kind'),f=sel.getAttribute('data-field');state[k].cols[f]=sel.value;
@@ -849,7 +847,7 @@ function renderColMap(kind){
     if(state[k].fileName)RekoDB.saveFile(k,{fileName:state[k].fileName,sheet:state[k].sheet,headerRow:state[k].headerRow,headers:state[k].headers,rows:state[k].rows,cols:state[k].cols}).catch(function(){});
   });});
 }
-function renderFileInfo(kind){var st=state[kind];var host=document.getElementById('info-'+kind);host.innerHTML='<b>'+esc(st.fileName)+'</b> &middot; '+st.rows.length+' baris data &middot; '+st.headers.length+' kolom<br><span class="tbl-list">'+st.sheetNames.map(function(n){return'<span>'+esc(n)+'</span>';}).join('')+'</span>';host.hidden=false;}
+function renderFileInfo(kind){var st=state[kind];var host=document.getElementById('info-'+kind);host.innerHTML='<b>'+esc(st.fileName)+'</b> - '+st.rows.length+' baris data - '+st.headers.length+' kolom<br><span class="tbl-list">'+st.sheetNames.map(function(n){return'<span>'+esc(n)+'</span>';}).join('')+'</span>';host.hidden=false;}
 function updateRunButton(){var btn=$('#btn-run');var ok=state.PJ&&state.PJ.cols.faktur&&state.PJ.cols.total&&state.UM&&state.UM.cols.faktur&&state.UM.cols.total;btn.disabled=!ok;return ok;}
 function wireDropzone(kind){
   var zone=document.getElementById('drop-'+kind);var input=zone.querySelector('input[type=file]');
@@ -862,7 +860,7 @@ function wireDropzone(kind){
 }
 function handleFile(kind,file){
   if(typeof XLSX==='undefined'){setStatus('Pembaca Excel (XLSX) belum termuat. Pastikan internet aktif, lalu muat ulang halaman.','error');return;}
-  setStatus('Membaca '+file.name+' ‚Ä¶');
+  setStatus('Membaca '+file.name+' ...');
   readExcel(file).then(function(wb){
     if(!wb.SheetNames.length)throw new Error('File tidak punya sheet.');
     loadSheetInto(kind,wb,wb.SheetNames[0],file.name);
@@ -882,7 +880,7 @@ function run(){
   if(!updateRunButton()){setStatus('Kolom No Faktur dan Total/Tagihan wajib dipetakan pada kedua file.','error');return;}
   state.loose=!!$('#opt-loose').checked;
   state.ignoreFaktur=!!$('#opt-ignore-faktur').checked;
-  setStatus('Mencocokkan data ‚Ä¶'+(state.ignoreFaktur?' (mode abaikan faktur)':(state.loose?' (mode longgar)':'')));
+  setStatus('Mencocokkan data ...'+(state.ignoreFaktur?' (mode abaikan faktur)':(state.loose?' (mode longgar)':'')));
   setTimeout(function(){
     try{
       var res=R.reconcile(state.PJ.rows,state.PJ.cols,state.UM.rows,state.UM.cols,{loose:state.loose,ignoreFaktur:state.ignoreFaktur});
@@ -904,9 +902,9 @@ function renderStats(){
   var s=state.result.stats;
   var main=[{k:'Total faktur',v:nf.format(s.jumlahFakturSemua),c:'brand',sub:'transaksi diproses'},{k:'Nilai penjualan',v:rp(s.nilaiPenjualan),c:'money',sub:'total dari Data Penjualan'},{k:'Sudah dibayar',v:rp(s.nilaiSudahDibayar),c:'ok',sub:nf.format(s.lunas)+' faktur lunas'},{k:'Sisa tagihan',v:rp(s.nilaiSisaBelumBayar),c:'bad',sub:nf.format(s.belumBayar+s.bayarSebagian)+' faktur masih ada sisa'}];
   $('#summary-main').innerHTML=main.map(function(c){return'<div class="summary-main-card '+c.c+'"><div class="summary-main-k">'+esc(c.k)+'</div><div class="summary-main-v">'+esc(c.v)+'</div><div class="summary-main-sub">'+esc(c.sub)+'</div></div>';}).join('');
-  var statuses=[{key:'lunas',label:'Lunas',value:s.lunas,icon:'‚úì',c:'ok'},{key:'sebagian',label:'Bayar sebagian',value:s.bayarSebagian,icon:'‚óê',c:'warn'},{key:'belum',label:'Belum bayar',value:s.belumBayar,icon:'!',c:'bad'},{key:'lebih',label:'Lebih bayar',value:s.lebihBayar,icon:'‚Üë',c:'info'},{key:'aneh',label:'Tidak ada di Penjualan',value:s.takAdaPenjualan,icon:'?',c:'violet'}];
+  var statuses=[{key:'lunas',label:'Lunas',value:s.lunas,icon:'OK',c:'ok'},{key:'sebagian',label:'Bayar sebagian',value:s.bayarSebagian,icon:'*',c:'warn'},{key:'belum',label:'Belum bayar',value:s.belumBayar,icon:'!',c:'bad'},{key:'lebih',label:'Lebih bayar',value:s.lebihBayar,icon:'↑',c:'info'},{key:'aneh',label:'Tidak ada di Penjualan',value:s.takAdaPenjualan,icon:'?',c:'violet'}];
   $('#summary-status-grid').innerHTML=statuses.map(function(x){return'<button type="button" class="summary-status '+x.c+'" data-summary-view="'+x.key+'"><span class="summary-status-icon">'+x.icon+'</span><span class="summary-status-text"><strong>'+esc(x.label)+'</strong><small>faktur</small></span><b class="summary-status-num">'+nf.format(x.value)+'</b></button>';}).join('');
-  $('#periode-info').textContent='Periode: '+fmtDateInText(state.result.stats.periode||'‚Äî');
+  $('#periode-info').textContent='Periode: '+fmtDateInText(state.result.stats.periode||'-');
 }
 function renderIssues(){
   var s=state.result.stats;var items=[];
@@ -995,7 +993,7 @@ function renderFilterKPI(list){
   $('#kpi-count').textContent=nf.format(list.length);
 }
 function pillFor(status){var map={LUNAS:'pill-lunas',BAYAR_SEBAGIAN:'pill-sebagian',BELUM_BAYAR:'pill-belum',LEBIH_BAYAR:'pill-lebih',FAKTUR_TIDAK_ADA_DI_PENJUALAN:'pill-aneh'};var label=R.STATUS_LABEL[status]||status;return'<span class="pill '+(map[status]||'')+'">'+esc(label)+'</span>';}
-function hubungiCell(o){if(!o.penerimaUM)return'<span class="sub">‚Äî</span>';return esc(o.penerimaUM)+'<span class="sub">penerima uang masuk</span>';}
+function hubungiCell(o){if(!o.penerimaUM)return'<span class="sub">-</span>';return esc(o.penerimaUM)+'<span class="sub">penerima uang masuk</span>';}
 function tagsFor(o){
   var t=[];var mt=o.matchType;
   if(mt==='SALAH_KETIK')t.push('<span class="tag tag-typo">Salah ketik faktur</span>');
@@ -1004,13 +1002,13 @@ function tagsFor(o){
   else if(mt==='COCOK_LONGGAR')t.push('<span class="tag tag-longgar">Mode Longgar</span>');
   else if(mt==='TAGIHAN_LAMA_BULAN_LALU')t.push('<span class="tag">Tagihan bulan lalu</span>');
   else if(mt==='PERSIS')t.push('<span class="tag tag-ok">Faktur sama</span>');
-  if(o.kategoriCocok===true)t.push('<span class="tag tag-ok">Kategori &#10003;</span>');
-  if(o.kategoriCocok===false){t.push('<span class="tag tag-bad">Kategori &#10007; '+esc((o.katPJ.join('/')||'-')+' vs '+(o.katUMAmt.join('/')||'-'))+'</span>');}
-  if(o.jenisCocok===true)t.push('<span class="tag tag-ok">Jenis &#10003;</span>');
-  if(o.jenisCocok===false){t.push('<span class="tag tag-bad">Jenis &#10007; '+esc(o.bayarPJ+' &rarr; '+((o.bayarPJ==='CASH')?'Dropping':'Piutang')+', tercatat '+o.jenisUM)+'</span>');}
+  if(o.kategoriCocok===true)t.push('<span class="tag tag-ok">Kategori OK</span>');
+  if(o.kategoriCocok===false){t.push('<span class="tag tag-bad">Kategori X '+esc((o.katPJ.join('/')||'-')+' vs '+(o.katUMAmt.join('/')||'-'))+'</span>');}
+  if(o.jenisCocok===true)t.push('<span class="tag tag-ok">Jenis OK</span>');
+  if(o.jenisCocok===false){t.push('<span class="tag tag-bad">Jenis X '+esc(o.bayarPJ+' -> '+((o.bayarPJ==='CASH')?'Dropping':'Piutang')+', tercatat '+o.jenisUM)+'</span>');}
   return t.join('');
 }
-function kategoriCell(o){var a=o.katPJ.map(function(c){return'<span class="tag '+(c==='Minyak'?'tag-minyak':'tag-rupa')+'">'+c+'</span>';}).join('');var b=o.katUMAmt.length?'<span class="sub">UM: '+esc(o.katUMAmt.join('/'))+'</span>':'<span class="sub">UM: ‚Äî</span>';return a+b;}
+function kategoriCell(o){var a=o.katPJ.map(function(c){return'<span class="tag '+(c==='Minyak'?'tag-minyak':'tag-rupa')+'">'+c+'</span>';}).join('');var b=o.katUMAmt.length?'<span class="sub">UM: '+esc(o.katUMAmt.join('/'))+'</span>':'<span class="sub">UM: -</span>';return a+b;}
 function renderTable(){
   var list=currentList();var all=state.result.invoices;
   function cnt(fn){return all.filter(fn).length;}
@@ -1027,13 +1025,13 @@ function renderTable(){
   if(!list.length){body.innerHTML='<tr><td colspan="14" style="text-align:center;padding:1.4rem;color:#3b5566">Tidak ada data yang cocok dengan filter ini.</td></tr>';}
   else{
     body.innerHTML=list.map(function(o){
-      var bayar=o.bayarPJ||'‚Äî';var bayarCell=esc(bayar)+(o.jenisUM?'<span class="sub">UM: '+esc(o.jenisUM)+'</span>':'<span class="sub">UM: ‚Äî</span>');
-      return'<tr data-key="'+esc(o.key)+'"><td>'+pillFor(o.status)+'</td><td class="mono">'+esc(o.fakturPJ||'‚Äî')+'</td><td class="mono">'+esc(o.fakturUM||'‚Äî')+'</td><td>'+esc(fmtDate(o.tanggal||o.tglFakturUM))+'</td><td>'+esc(o.customer||'‚Äî')+'</td><td>'+esc(o.alamat||'‚Äî')+'</td><td>'+esc(o.sales||'‚Äî')+'</td><td>'+bayarCell+'</td><td class="num">'+rp(o.invoiceTotal)+'</td><td class="num">'+rp(o.paidTotal)+'</td><td class="num"><b>'+rp(o.sisa)+'</b></td><td>'+kategoriCell(o)+'</td><td>'+tagsFor(o)+'</td><td>'+hubungiCell(o)+'</td></tr>';
+      var bayar=o.bayarPJ||'-';var bayarCell=esc(bayar)+(o.jenisUM?'<span class="sub">UM: '+esc(o.jenisUM)+'</span>':'<span class="sub">UM: -</span>');
+      return'<tr data-key="'+esc(o.key)+'"><td>'+pillFor(o.status)+'</td><td class="mono">'+esc(o.fakturPJ||'-')+'</td><td class="mono">'+esc(o.fakturUM||'-')+'</td><td>'+esc(fmtDate(o.tanggal||o.tglFakturUM))+'</td><td>'+esc(o.customer||'-')+'</td><td>'+esc(o.alamat||'-')+'</td><td>'+esc(o.sales||'-')+'</td><td>'+bayarCell+'</td><td class="num">'+rp(o.invoiceTotal)+'</td><td class="num">'+rp(o.paidTotal)+'</td><td class="num"><b>'+rp(o.sisa)+'</b></td><td>'+kategoriCell(o)+'</td><td>'+tagsFor(o)+'</td><td>'+hubungiCell(o)+'</td></tr>';
     }).join('');
     body.querySelectorAll('tr[data-key]').forEach(function(tr){tr.addEventListener('click',function(){openDetail(tr.getAttribute('data-key'));});});
   }
   renderFilterKPI(list);
-  $('#table-foot').innerHTML='Menampilkan <b>'+nf.format(list.length)+'</b> dari '+nf.format(all.length)+' nomor faktur &middot; total sisa pada tampilan ini: <b>Rp '+nf.format(list.reduce(function(a,o){return a+(o.sisa>0?o.sisa:0);},0))+'</b>';
+  $('#table-foot').innerHTML='Menampilkan <b>'+nf.format(list.length)+'</b> dari '+nf.format(all.length)+' nomor faktur - total sisa pada tampilan ini: <b>Rp '+nf.format(list.reduce(function(a,o){return a+(o.sisa>0?o.sisa:0);},0))+'</b>';
 }
 function renderSalesFilter(){var set={};state.result.invoices.forEach(function(o){if(o.sales)set[o.sales]=1;});var keys=Object.keys(set).sort();var sel=$('#sales-filter');sel.innerHTML='<option value="">Semua</option>'+keys.map(function(k){return'<option value="'+esc(k)+'"'+(k===state.sales?' selected':'')+'>'+esc(k)+'</option>';}).join('');}
 function render(){renderStats();renderIssues();renderSalesFilter();renderTable();}
@@ -1042,11 +1040,11 @@ function openDetail(key){
   var o=state.result.invoices.filter(function(x){return x.key===key;})[0];if(!o)return;
   $('#detail-title').textContent='Faktur '+(o.fakturPJ||o.fakturUM||o.key);
   var h='';
-  h+='<div class="dl-grid">'+dg('Status',(R.STATUS_LABEL[o.status]||o.status))+dg('No Faktur Penjualan',o.fakturPJ||'‚Äî')+dg('No Faktur Uang Masuk',o.fakturUM||'‚Äî')+dg('Cara cocok',R.MATCH_LABEL[o.matchType]||o.matchType)+dg('Tanggal',fmtDate(o.tanggal))+dg('Tgl Faktur (UM)',fmtDate(o.tglFakturUM))+dg('Toko / Customer',o.customer||'‚Äî')+dg('Alamat',o.alamat||'‚Äî')+dg('Sales',o.sales||'‚Äî')+dg('Pembayaran (Penjualan)',o.bayarPJ||'‚Äî')+dg('Jenis (Uang Masuk)',o.jenisUM||'‚Äî')+dg('Penerima (Uang Masuk)',o.penerimaUM||'‚Äî')+dg('Nilai Tagihan','Rp '+rp(o.invoiceTotal)+' ('+o.invoiceTotalSumber+')')+dg('Sudah Dibayar','Rp '+rp(o.paidTotal))+dg('Sisa','Rp '+rp(o.sisa))+'</div>';
+  h+='<div class="dl-grid">'+dg('Status',(R.STATUS_LABEL[o.status]||o.status))+dg('No Faktur Penjualan',o.fakturPJ||'-')+dg('No Faktur Uang Masuk',o.fakturUM||'-')+dg('Cara cocok',R.MATCH_LABEL[o.matchType]||o.matchType)+dg('Tanggal',fmtDate(o.tanggal))+dg('Tgl Faktur (UM)',fmtDate(o.tglFakturUM))+dg('Toko / Customer',o.customer||'-')+dg('Alamat',o.alamat||'-')+dg('Sales',o.sales||'-')+dg('Pembayaran (Penjualan)',o.bayarPJ||'-')+dg('Jenis (Uang Masuk)',o.jenisUM||'-')+dg('Penerima (Uang Masuk)',o.penerimaUM||'-')+dg('Nilai Tagihan','Rp '+rp(o.invoiceTotal)+' ('+o.invoiceTotalSumber+')')+dg('Sudah Dibayar','Rp '+rp(o.paidTotal))+dg('Sisa','Rp '+rp(o.sisa))+'</div>';
   if(o.catatan&&o.catatan.length){h+='<h4>Catatan pemeriksaan</h4><ul class="notes">'+o.catatan.map(function(c){return'<li>'+esc(fmtDateInText(c))+'</li>';}).join('')+'</ul>';}else{h+='<h4>Catatan pemeriksaan</h4><ul class="notes"><li class="ok">Tidak ada kejanggalan yang terdeteksi.</li></ul>';}
   if(o.kandidat&&o.kandidat.length){h+='<h4>Kandidat nomor faktur yang mirip (bandingkan &amp; putuskan)</h4><table class="mini-table"><thead><tr><th>No Faktur Penjualan</th><th>Jenis kemiripan</th><th>Bukti pendukung</th></tr></thead><tbody>'+o.kandidat.map(function(c){return'<tr><td class="mono">'+esc(c.fakturPJ)+'</td><td>'+esc(c.tipe)+'</td><td>'+esc(c.bukti)+(c.skor>=4?' <span class="tag tag-ok">bukti cukup</span>':'')+'</td></tr>';}).join('')+'</tbody></table>';}
   if(o.pjLines&&o.pjLines.length){h+='<h4>Rincian barang di Penjualan</h4><table class="mini-table"><thead><tr><th>Produk</th><th>Qty</th><th>Kategori</th><th style="text-align:right">Nilai</th></tr></thead><tbody>'+o.pjLines.map(function(l){return'<tr><td>'+esc(l.produk)+'</td><td>'+nf2.format(l.qty)+'</td><td>'+esc(l.kategori)+'</td><td style="text-align:right">'+rp(l.total)+'</td></tr>';}).join('')+'</tbody></table>';}
-  if(o.umRows&&o.umRows.length){h+='<h4>Rincian pembayaran di Uang Masuk (cicilan)</h4><table class="mini-table"><thead><tr><th>Tanggal</th><th>Jenis</th><th>Kategori</th><th>Ket</th><th style="text-align:right">Tagihan saat itu</th><th style="text-align:right">Dibayar</th></tr></thead><tbody>'+o.umRows.map(function(r){return'<tr><td>'+esc(fmtDate(r.tanggal))+'</td><td>'+esc(r.jenis)+'</td><td>'+esc(r.kategori||'‚Äî')+'</td><td>'+esc(r.ket||'‚Äî')+'</td><td style="text-align:right">'+rp(r.tagihan)+'</td><td style="text-align:right">'+rp(r.total)+'</td></tr>';}).join('')+'</tbody></table>';}
+  if(o.umRows&&o.umRows.length){h+='<h4>Rincian pembayaran di Uang Masuk (cicilan)</h4><table class="mini-table"><thead><tr><th>Tanggal</th><th>Jenis</th><th>Kategori</th><th>Ket</th><th style="text-align:right">Tagihan saat itu</th><th style="text-align:right">Dibayar</th></tr></thead><tbody>'+o.umRows.map(function(r){return'<tr><td>'+esc(fmtDate(r.tanggal))+'</td><td>'+esc(r.jenis)+'</td><td>'+esc(r.kategori||'-')+'</td><td>'+esc(r.ket||'-')+'</td><td style="text-align:right">'+rp(r.tagihan)+'</td><td style="text-align:right">'+rp(r.total)+'</td></tr>';}).join('')+'</tbody></table>';}
   h+='<div class="modal-actions"><button class="btn btn-primary btn-sm" id="btn-print-one"><i class="fa-solid fa-print"></i> Cetak / Simpan PDF</button><button class="btn btn-ghost btn-sm" id="btn-export-one"><i class="fa-solid fa-file-excel"></i> Unduh rincian (Excel)</button></div>';
   $('#detail-body').innerHTML=h;$('#detail-modal').hidden=false;
   $('#btn-print-one').addEventListener('click',function(){window.print();});
@@ -1055,7 +1053,7 @@ function openDetail(key){
 function closeDetail(){$('#detail-modal').hidden=true;}
 function showHasilSection(){['tab-ringkasan','tab-tabel'].forEach(function(id){var el=document.getElementById(id);if(el)el.hidden=false;});var legacy=document.getElementById('hasil');if(legacy)legacy.hidden=true;updateTabBadges();}
 function hideHasilSection(){['tab-ringkasan','tab-tabel'].forEach(function(id){var el=document.getElementById(id);if(el)el.hidden=true;});var legacy=document.getElementById('hasil');if(legacy)legacy.hidden=true;}
-function updateTabBadges(){if(!state.result){['badge-ringkasan','badge-tabel'].forEach(function(id){var b=document.getElementById(id);if(b)b.textContent='0';});return;}var total=state.result.invoices.length;var nLunas=state.result.invoices.filter(function(o){return o.status==='LUNAS';}).length;var br=document.getElementById('badge-ringkasan');var bt=document.getElementById('badge-tabel');if(br)br.textContent=nf.format(total);if(bt)bt.textContent=nf.format(total)+' / ‚úì'+nf.format(nLunas);}
+function updateTabBadges(){if(!state.result){['badge-ringkasan','badge-tabel'].forEach(function(id){var b=document.getElementById(id);if(b)b.textContent='0';});return;}var total=state.result.invoices.length;var nLunas=state.result.invoices.filter(function(o){return o.status==='LUNAS';}).length;var br=document.getElementById('badge-ringkasan');var bt=document.getElementById('badge-tabel');if(br)br.textContent=nf.format(total);if(bt)bt.textContent=nf.format(total)+' / '+nf.format(nLunas);}
 function switchTab(tabId){
   document.querySelectorAll('.topnav a[data-tab-link]').forEach(function(a){a.classList.toggle('is-active', a.getAttribute('data-tab-link')===tabId);});
   document.querySelectorAll('.tab-panel').forEach(function(p){p.hidden=(p.getAttribute('data-tab-panel')!==tabId);});
@@ -1069,7 +1067,7 @@ function rowMain(o){return[R.STATUS_LABEL[o.status]||o.status,o.fakturPJ,o.faktu
 function sheetFrom(aoa,widths){var ws=XLSX.utils.aoa_to_sheet(aoa);if(widths)ws['!cols']=widths.map(function(w){return{wch:w};});if(aoa.length>1&&aoa[0]&&aoa[0].length>1)ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:aoa.length-1,c:aoa[0].length-1}})};return ws;}
 function buildRecapWB(){
   var res=state.result;var wb=XLSX.utils.book_new();var st=res.stats;
-  var aoa=[['REKONSILIASI PENJUALAN vs UANG MASUK'],['Dibuat',new Date().toLocaleString('id-ID')],['Periode penjualan',fmtDateInText(st.periode)],['File Penjualan',state.PJ.fileName],['File Uang Masuk',state.UM.fileName],['Mode',(state.ignoreFaktur?'ABAikan faktur':(state.loose?'Longgar':'Normal'))],[],['RINGKASAN','JUMLAH'],['Nomor faktur diproses',st.jumlahFakturSemua],['Cocok longgar',st.longgar],['Lunas',st.lunas],['Bayar sebagian',st.bayarSebagian],['Belum bayar',st.belumBayar],['Lebih bayar',st.lebihBayar],['Faktur tidak ada di Penjualan',st.takAdaPenjualan],['(dari itu) tagihan bulan lalu',st.tagihanLama],['Salah ketik',st.salahKetip],['Perlu dicek',st.perluCek],['Kategori tidak cocok',st.kategoriBeda],['Jenis tidak cocok',st.jenisBeda],[],['NILAI (RUPIAH)','JUMLAH'],['Nilai Penjualan',st.nilaiPenjualan],['Nilai Uang Masuk',st.nilaiUangMasuk],['Total sudah dibayar',st.nilaiSudahDibayar],['Sisa belum dibayar',st.nilaiSisaBelumBayar]];
+  var aoa=[['REKONSILIASI PENJUALAN vs UANG MASUK'],['Dibuat',new Date().toLocaleString('id-ID')],['Periode penjualan',fmtDateInText(st.periode)],['File Penjualan',state.PJ.fileName],['File Uang Masuk',state.UM.fileName],['Mode',(state.ignoreFaktur?'Abaikan faktur':(state.loose?'Longgar':'Normal'))],[],['RINGKASAN','JUMLAH'],['Nomor faktur diproses',st.jumlahFakturSemua],['Cocok longgar',st.longgar],['Lunas',st.lunas],['Bayar sebagian',st.bayarSebagian],['Belum bayar',st.belumBayar],['Lebih bayar',st.lebihBayar],['Faktur tidak ada di Penjualan',st.takAdaPenjualan],['(dari itu) tagihan bulan lalu',st.tagihanLama],['Salah ketik',st.salahKetip],['Perlu dicek',st.perluCek],['Kategori tidak cocok',st.kategoriBeda],['Jenis tidak cocok',st.jenisBeda],[],['NILAI (RUPIAH)','JUMLAH'],['Nilai Penjualan',st.nilaiPenjualan],['Nilai Uang Masuk',st.nilaiUangMasuk],['Total sudah dibayar',st.nilaiSudahDibayar],['Sisa belum dibayar',st.nilaiSisaBelumBayar]];
   XLSX.utils.book_append_sheet(wb,sheetFrom(aoa,[40,26]),'Ringkasan');
   var all=res.invoices.slice().sort(function(a,b){return(STATUS_ORDER[a.status]||0)-(STATUS_ORDER[b.status]||0)||b.sisa-a.sisa;});
   XLSX.utils.book_append_sheet(wb,sheetFrom([HEAD_MAIN].concat(all.map(rowMain)),WIDTHS),'Rekap Faktur');
@@ -1094,7 +1092,7 @@ function buildRecapWB(){
 }
 function exportRecap(){if(!state.result)return;try{var wb=buildRecapWB();XLSX.writeFile(wb,'Rekonsiliasi_Penjualan_UangMasuk_'+new Date().toISOString().slice(0,10)+'.xlsx');setStatus('File hasil rekonsiliasi diunduh.','ok');}catch(e){setStatus('Gagal membuat file: '+e.message,'error');}}
 function exportTwoSheets(){if(!state.result)return;try{var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,sheetFrom([HEAD_MAIN].concat(state.result.invoices.map(rowMain)),WIDTHS),'Rekap Per Faktur');var umHead=['Tanggal','Jenis','Sales','Penerima','No Faktur (asli)','Dipasangkan ke Faktur','Nama Toko','Alamat','Tagihan','Kategori','Ket','Dibayar','Status Faktur'];var aoa=[umHead].concat(state.result.umRows.map(function(r){return[fmtDate(r.tanggal),r.jenis,r.sales,r.penerima,r.fakturRaw,r.fakturFinal,r.toko,r.alamat,r.tagihan,r.kategori,r.ket,r.total,R.STATUS_LABEL[r.status]||r.status||'']; }));XLSX.utils.book_append_sheet(wb,sheetFrom(aoa,[12,11,14,12,20,20,22,18,13,16,12,14,20]),'Rincian Baris Uang Masuk');XLSX.writeFile(wb,'Rekonsiliasi_2Sheet_'+new Date().toISOString().slice(0,10)+'.xlsx');setStatus('File 2 sheet diunduh.','ok');}catch(e){setStatus('Gagal membuat file: '+e.message,'error');}}
-function exportOne(o){try{var wb=XLSX.utils.book_new();var aoa=[['FORMULIR KONFIRMASI PEMBAYARAN'],[],['Status',R.STATUS_LABEL[o.status]||o.status],['No Faktur Penjualan',o.fakturPJ||'‚Äî'],['No Faktur Uang Masuk',o.fakturUM||'‚Äî'],['Cara cocok',R.MATCH_LABEL[o.matchType]||o.matchType],['Tanggal',fmtDate(o.tanggal)],['Toko / Customer',o.customer||'‚Äî'],['Alamat',o.alamat||'‚Äî'],['Sales',o.sales||'‚Äî'],['Pembayaran (Penjualan)',o.bayarPJ||'‚Äî'],['Jenis (Uang Masuk)',o.jenisUM||'‚Äî'],['Penerima (Uang Masuk)',o.penerimaUM||'‚Äî'],[],['Nilai Tagihan',o.invoiceTotal],['Sudah Dibayar',o.paidTotal],['Sisa',o.sisa],[],['CATATAN PEMERIKSAAN']];if(o.catatan&&o.catatan.length)o.catatan.forEach(function(c){aoa.push([c]);});else aoa.push(['Tidak ada kejanggalan yang terdeteksi.']);aoa.push([]);aoa.push(['Tanda tangan pemeriksa','............................']);aoa.push(['Tanggal periksa','............................']);XLSX.utils.book_append_sheet(wb,sheetFrom(aoa,[30,60]),'Konfirmasi');if(o.pjLines&&o.pjLines.length){XLSX.utils.book_append_sheet(wb,sheetFrom([['Produk','Qty','Kategori','Nilai']].concat(o.pjLines.map(function(l){return[l.produk,l.qty,l.kategori,l.total];})),[30,8,12,14]),'Barang');}if(o.umRows&&o.umRows.length){XLSX.utils.book_append_sheet(wb,sheetFrom([['Tanggal','Jenis','Kategori','Ket','Tagihan','Dibayar']].concat(o.umRows.map(function(r){return[fmtDate(r.tanggal),r.jenis,r.kategori,r.ket,r.tagihan,r.total];})),[12,12,16,12,14,14]),'Pembayaran');}XLSX.writeFile(wb,'Konfirmasi_'+(o.fakturPJ||o.key)+'.xlsx');setStatus('Formulir konfirmasi diunduh.','ok');}catch(e){setStatus('Gagal membuat file: '+e.message,'error');}}
+function exportOne(o){try{var wb=XLSX.utils.book_new();var aoa=[['FORMULIR KONFIRMASI PEMBAYARAN'],[],['Status',R.STATUS_LABEL[o.status]||o.status],['No Faktur Penjualan',o.fakturPJ||'-'],['No Faktur Uang Masuk',o.fakturUM||'-'],['Cara cocok',R.MATCH_LABEL[o.matchType]||o.matchType],['Tanggal',fmtDate(o.tanggal)],['Toko / Customer',o.customer||'-'],['Alamat',o.alamat||'-'],['Sales',o.sales||'-'],['Pembayaran (Penjualan)',o.bayarPJ||'-'],['Jenis (Uang Masuk)',o.jenisUM||'-'],['Penerima (Uang Masuk)',o.penerimaUM||'-'],[],['Nilai Tagihan',o.invoiceTotal],['Sudah Dibayar',o.paidTotal],['Sisa',o.sisa],[],['CATATAN PEMERIKSAAN']];if(o.catatan&&o.catatan.length)o.catatan.forEach(function(c){aoa.push([c]);});else aoa.push(['Tidak ada kejanggalan yang terdeteksi.']);aoa.push([]);aoa.push(['Tanda tangan pemeriksa','............................']);aoa.push(['Tanggal periksa','............................']);XLSX.utils.book_append_sheet(wb,sheetFrom(aoa,[30,60]),'Konfirmasi');if(o.pjLines&&o.pjLines.length){XLSX.utils.book_append_sheet(wb,sheetFrom([['Produk','Qty','Kategori','Nilai']].concat(o.pjLines.map(function(l){return[l.produk,l.qty,l.kategori,l.total];})),[30,8,12,14]),'Barang');}if(o.umRows&&o.umRows.length){XLSX.utils.book_append_sheet(wb,sheetFrom([['Tanggal','Jenis','Kategori','Ket','Tagihan','Dibayar']].concat(o.umRows.map(function(r){return[fmtDate(r.tanggal),r.jenis,r.kategori,r.ket,r.tagihan,r.total];})),[12,12,16,12,14,14]),'Pembayaran');}XLSX.writeFile(wb,'Konfirmasi_'+(o.fakturPJ||o.key)+'.xlsx');setStatus('Formulir konfirmasi diunduh.','ok');}catch(e){setStatus('Gagal membuat file: '+e.message,'error');}}
 function sampleWB(){
   var pj=[['TANGGAL','NO. FAKTUR','PRODUK','QTY','SATUAN','TOTAL','SALES','PEMBAYARAN','CUSTOMER','ALAMAT'],['19/9/2026','011003260900750','FITRI BOTOL 800ML',10,'PCS',500000,'HAFID','TEMPO','TOKO MAKMUR','KENTENG'],['19/9/2026','011003260900751','MIE IKAT KECIL',50,'IKT',1161250,'RAJU','CASH','TOKO BARU JAYA','BOCOR'],['19/9/2026','011003260900752','SHZ KIREI 85GR',12,'PCS',52800,'HAFID','TEMPO','TOKO AISYAH','PASAR KENTENG'],['20/9/2026','011003260900753','FITRI BOTOL 400ML',20,'PCS',640000,'JOSSY','TEMPO','TOKO SUROJOYO','GUNUNGSARI'],['20/9/2026','011003260900754','SAMBAL CABE 500GR',5,'PCS',175000,'JOSSY','CASH','TOKO BU SITI','LOGANDU'],['20/9/2026','011003260900755','FITRI BOTOL 200ML',24,'PCS',384000,'HAFID','TEMPO','TOKO WALUYO','WIROMARTAN']];
   var um=[['Tanggal','Jenis','Sales','Penerima','No Faktur','Nama Toko','Alamat','Tgl Faktur','JT','Tagihan','Kategori/Pembayaran','Minyak_Cash','Minyak_Transfer','Rupa2_Cash','Rupa2_Transfer','Ket','Total'],['2026-09-21','Piutang','HAFID','','011003260900750','TOKO MAKMUR','KENTENG','2026-09-19','2026-10-01',500000,'MinyakCash',500000,0,0,0,'LUNAS',500000],['2026-09-21','Dropping','RAJU','ZEIN','011003260900751','TOKO BARU JAYA','BOCOR','2026-09-19','',1161250,'Rupa2Cash',0,0,1161250,0,'LUNAS',1161250],['2026-09-21','Piutang','HAFID','','01100326090075','TOKO AISYAH','PASAR KENTENG','2026-09-19','2026-10-01',52800,'MinyakCash',52800,0,0,0,'LUNAS',52800],['2026-09-21','Piutang','JOSSY','','0110032609007530','TOKO SUROJOYO','GUNUNGSARI','2026-09-20','2026-10-02',640000,'MinyakCash',300000,0,0,0,'TITIP',300000],['2026-09-21','Dropping','JOSSY','ALIM','011003260900754','TOKO BU SITI','LOGANDU','2026-09-20','',175000,'MinyakCash',175000,0,0,0,'LUNAS',175000],['2026-09-21','Piutang','HAFID','','011003260899999','TOKO LAMA','TEROK','2026-08-10','2026-08-25',400000,'MinyakCash',250000,0,0,0,'TITIP',250000],['2026-09-21','Piutang','HAFID','','011003260900753','TOKO SUROJOYO','GUNUNGSARI','2026-09-20','2026-10-02',640000,'MinyakCash',640000,0,0,0,'LUNAS',640000]];
@@ -1173,13 +1171,13 @@ function init(){
   });
   var btnLoadDb=document.getElementById('btn-load-db');
   if(btnLoadDb)btnLoadDb.addEventListener('click',function(){
-    setStatus('Memuat dari IndexedDB ‚Ä¶');
+    setStatus('Memuat dari IndexedDB ...');
     restoreFromDB().then(function(ok){if(!ok)setStatus('Tidak ada data tersimpan di IndexedDB.','error');}).catch(function(e){setStatus('Gagal memuat: '+e.message,'error');});
   });
   var btnSaveDb=document.getElementById('btn-save-db');
   if(btnSaveDb)btnSaveDb.addEventListener('click',function(){
     if(!state.result){setStatus('Belum ada hasil untuk disimpan.','error');return;}
-    setStatus('Menyimpan ‚Ä¶');
+    setStatus('Menyimpan ...');
     Promise.all([
       state.PJ?RekoDB.saveFile('PJ',{fileName:state.PJ.fileName,sheet:state.PJ.sheet,headerRow:state.PJ.headerRow,headers:state.PJ.headers,rows:state.PJ.rows,cols:state.PJ.cols}):Promise.resolve(),
       state.UM?RekoDB.saveFile('UM',{fileName:state.UM.fileName,sheet:state.UM.sheet,headerRow:state.UM.headerRow,headers:state.UM.headers,rows:state.UM.rows,cols:state.UM.cols}):Promise.resolve(),
